@@ -11,16 +11,25 @@ public class TinyRenderer : MonoBehaviour
 
     void Start()
     {
-        m_camera = GetComponent<Camera>();
-        m_lastUseUnityNativeRendering=m_config.m_useUnityNativeRendering;
+        Init();
         
 
         OnOffUnityRendering();
     }
 
+    void Init()
+    {
+        
+        m_lastUseUnityNativeRendering=m_config.m_useUnityNativeRendering;
+        
+        m_camera = GetComponent<Camera>();
+        
+        //setup raw img
+        
+    }
+
     void OnOffUnityRendering()
     {
-        //todo handle raw img 
         if (m_config.m_useUnityNativeRendering)
         {
             //render all layers
