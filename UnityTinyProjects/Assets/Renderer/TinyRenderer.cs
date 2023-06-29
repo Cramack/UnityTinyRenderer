@@ -6,25 +6,90 @@ public class TinyRenderer : MonoBehaviour
     public RawImage m_rawImage;
     public Camera m_camera;
     public bool m_useNativeUnityRendering;
-   private Texture2D m_texture2D;
+    private Texture2D m_texture2D;
 
+    [SerializeField]
+    GameObject m_headModel;
+    
+    
     void Start()
     {
         Init();
         OnOffUnityNativeRendering();
     }
 
-    void Init()
+    void SetupRenderingEnv()
     {
-        //setup raw img
-        m_texture2D = new Texture2D(Screen.width, Screen.height);
         Debug.Log("Screen.width:" + Screen.width + " Screen.height:" + Screen.height);
+        m_texture2D = new Texture2D(Screen.width, Screen.height);
         m_texture2D.filterMode = FilterMode.Point;
-        
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
-        Debug.Log("mipmap count"+m_texture2D.mipmapCount);
     }
+    
+
+    void Init()
+    {
+        SetupRenderingEnv();
+    }
+    
+    //Bresenham’s Line Drawing Algorithm
+    void DrawLine(int x0, int y0, int x1, int y1, Color color)
+    {
+        bool steep = false;
+        if (Mathf.Abs(x0 - x1) < Mathf.Abs(y0 - y1))
+        {
+            //swap x0,y0
+            int temp = x0;
+            x0 = y0;
+            y0 = temp;
+            
+            //swap x1,y1
+            temp = x1;
+            x1 = y1;
+            y1 = temp;
+            
+            steep = true;
+        }
+
+        if (x0 > x1)
+        {
+            //swap x0,x1
+            int temp = x0;
+            x0 = x1;
+            x1 = temp;
+            
+            //swap y0,y1
+            temp = y0;
+            y0 = y1;
+            y1 = temp;
+        }
+
+        int dx = x1 - x0;
+        int dy = y1 - y0;
+        int derror2 = Mathf.Abs(dy) * 2;
+        int error2 = 0;
+        int y = y0;
+        for (int x = x0; x <= x1; x++)
+        {
+            if (steep)
+            {
+                SetPixel(y,x,color);
+            }
+            else
+            {
+                SetPixel(x,y,color);
+            }
+
+            error2 += derror2;
+            if (error2 > dx)
+            {
+                y += (y1 > y0 ? 1 : -1);
+                error2 -= dx * 2;
+            }
+        }
+    }
+    
 
     void SetPixel(int x,int y,Color color)
     {
@@ -50,14 +115,15 @@ public class TinyRenderer : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+
+    void DrawHeadModel()
     {
+        
     }
 
     void Render()
     {
-        SetPixel(52,41,Color.red);
+        
         
         this.m_texture2D.Apply();
     }
