@@ -19,10 +19,16 @@ public class TinyRenderer : MonoBehaviour
         //setup raw img
         m_texture2D = new Texture2D(Screen.width, Screen.height);
         Debug.Log("Screen.width:" + Screen.width + " Screen.height:" + Screen.height);
-        // m_rawImage.texture=
+        m_texture2D.filterMode = FilterMode.Point;
         
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
+        Debug.Log("mipmap count"+m_texture2D.mipmapCount);
+    }
+
+    void SetPixel(int x,int y,Color color)
+    {
+        this.m_texture2D.SetPixel(x,y,color); 
     }
 
     /// <summary>
@@ -51,6 +57,9 @@ public class TinyRenderer : MonoBehaviour
 
     void Render()
     {
+        SetPixel(52,41,Color.red);
+        
+        this.m_texture2D.Apply();
     }
 
     /// <summary>
