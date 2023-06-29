@@ -3,34 +3,28 @@ using UnityEngine.UI;
 
 public class TinyRenderer : MonoBehaviour
 {
-    public RendererConfig m_config;
     public RawImage m_rawImage;
-    Camera m_camera;
-    
-    private bool m_lastUseUnityNativeRendering;
+    public Camera m_camera;
+    public bool m_useNativeUnityRendering;
+
 
     void Start()
     {
         Init();
-        
-
-        OnOffUnityRendering();
+        OnOffUnityNativeRendering();
     }
 
     void Init()
     {
-        
-        m_lastUseUnityNativeRendering=m_config.m_useUnityNativeRendering;
-        
-        m_camera = GetComponent<Camera>();
-        
         //setup raw img
-        
     }
 
-    void OnOffUnityRendering()
+    /// <summary>
+    /// 开关Unity原生渲染
+    /// </summary>
+    void OnOffUnityNativeRendering()
     {
-        if (m_config.m_useUnityNativeRendering)
+        if (m_useNativeUnityRendering)
         {
             //render all layers
             m_camera.cullingMask = -1;
@@ -51,19 +45,15 @@ public class TinyRenderer : MonoBehaviour
 
     void Render()
     {
-        
     }
+
+    /// <summary>
+    /// 只有attach到camera上才会调用
+    /// </summary>
     void OnPostRender()
     {
-        if (!m_config.m_useUnityNativeRendering)
-        {
-            Render();
-        }
-        
-        if(m_lastUseUnityNativeRendering!=m_config.m_useUnityNativeRendering){
-            m_lastUseUnityNativeRendering=m_config.m_useUnityNativeRendering;
-            OnOffUnityRendering();
-        }
-        
+        Render();
+
+        OnOffUnityNativeRendering();
     }
 }
