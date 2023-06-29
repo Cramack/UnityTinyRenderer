@@ -6,7 +6,7 @@ public class TinyRenderer : MonoBehaviour
     public RawImage m_rawImage;
     public Camera m_camera;
     public bool m_useNativeUnityRendering;
-
+   private Texture2D m_texture2D;
 
     void Start()
     {
@@ -17,6 +17,12 @@ public class TinyRenderer : MonoBehaviour
     void Init()
     {
         //setup raw img
+        m_texture2D = new Texture2D(Screen.width, Screen.height);
+        Debug.Log("Screen.width:" + Screen.width + " Screen.height:" + Screen.height);
+        // m_rawImage.texture=
+        
+        m_rawImage.texture = m_texture2D;
+        m_rawImage.SetNativeSize();
     }
 
     /// <summary>
