@@ -80,11 +80,11 @@ public class TinyRenderer : MonoBehaviour
         {
             if (steep)
             {
-                SetPixel(y, x, color);
+                DrawPixel(y, x, color);
             }
             else
             {
-                SetPixel(x, y, color);
+                DrawPixel(x, y, color);
             }
 
             error2 += derror2;
@@ -97,7 +97,7 @@ public class TinyRenderer : MonoBehaviour
     }
 
 
-    void SetPixel(int x, int y, Color color)
+    void DrawPixel(int x, int y, Color color)
     {
         this.m_texture2D.SetPixel(x, y, color);
     }
@@ -195,6 +195,11 @@ public class TinyRenderer : MonoBehaviour
             topY=y2;
             topX=x2;
         }
+        
+        DrawPixel(topX,topY,color);
+        
+        
+        
         //degenerate triangle #ltd
     }
     
