@@ -77,6 +77,14 @@ public class TinyRenderer : MonoBehaviour
         {
             (startP,startQ)=(endP,endQ);
         }
+
+
+        //handle degenerate cases
+        if (endP == startP)
+        {
+            DrawPixel(startP,startQ, color);
+            return;
+        }
         
         //how q changes with p
         float k_pq=(endQ-startQ)/(float)(endP-startP);
@@ -291,6 +299,15 @@ public class TinyRenderer : MonoBehaviour
         {
             DrawLineInPixels(80,40,13,20,Color.green);
         }
+        
+        //draw a horizontal line
+        DrawLineInPixels(100,20,200,20,Color.cyan);
+        
+        //draw a vertical line
+        DrawLineInPixels(150,20,150,120,Color.yellow);
+        
+        //draw a point 
+        DrawLineInPixels(200,200,200,200,Color.magenta);
     }
     
     void Render()
