@@ -11,7 +11,14 @@ public class TinyRenderer : MonoBehaviour
     private Texture2D m_texture2D;
 
 
-    public bool m_drawLine;
+    public DrawMode m_drawMode=DrawMode.All;
+    
+    public enum DrawMode 
+    {
+        Line,
+        Filled,
+        All
+    }
     
 
     [SerializeField]
@@ -188,10 +195,16 @@ public class TinyRenderer : MonoBehaviour
 
         // Sort the points based on their Y value.
         points.Sort((a, b) => b.Y.CompareTo(a.Y));
-
-        DrawPixel(points[0].X, points[0].Y, color); //top point
-        DrawPixel(points[1].X, points[1].Y, color); //mid point
-        DrawPixel(points[2].X, points[2].Y, color); //bot point
+        
+        var top = points[0];
+        var mid = points[1];
+        var bot = points[2];
+        //draw top part
+        for (int y = top.Y; y>=mid.Y; y--)
+        {
+            DrawPixel(top.X,y,color);
+        }
+        
     }
 
     
@@ -218,12 +231,17 @@ public class TinyRenderer : MonoBehaviour
     {
         Clear(); 
         
-        if (m_drawLine)
+        if (m_drawMode == DrawMode.Line)
         {
             RenderTestDrawWireTriangles();
         }
+        else if (m_drawMode==DrawMode.Filled)
+        {
+            RenderTestFillTriangles();
+        }
         else
         {
+            RenderTestDrawWireTriangles();
             RenderTestFillTriangles();
         }
         
