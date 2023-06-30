@@ -13,6 +13,8 @@ public class TinyRenderer : MonoBehaviour
 
     private Texture2D m_texture2D;
 
+    Color[] m_frameBuf;
+
 
     public DrawMode m_drawMode=DrawMode.All;
     
@@ -37,12 +39,18 @@ public class TinyRenderer : MonoBehaviour
     void SetupRenderingEnv()
     {
         Debug.Log("Screen.width:" + Screen.width + " Screen.height:" + Screen.height);
+        //set up screen
         m_texture2D = new Texture2D(Screen.width, Screen.height);
         m_texture2D.filterMode = FilterMode.Point;
         m_texture2D.wrapMode= TextureWrapMode.Clamp;
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
+        
+        //frame buf 
+        m_frameBuf = new Color[Screen.width* Screen.height];
     }
+    
+    
 
 
     void Init()
@@ -170,7 +178,7 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawPixel(int x, int y, Color color)
     {
-        this.m_texture2D.SetPixel(x, y, color);
+        this.m_frameBuf[y*this.m_texture2D.width+ x] = color;
     }
 
     /// <summary>
@@ -193,7 +201,7 @@ public class TinyRenderer : MonoBehaviour
     }
 
     [SerializeField]
-    int m_drawTriLimit=5;
+    int m_drawTriLimit=1;
 
     void DrawHeadModel()
     {
@@ -294,7 +302,7 @@ public class TinyRenderer : MonoBehaviour
         {
             for (int j = 0; j < m_texture2D.height; j++)
             {
-                m_texture2D.SetPixel(i,j,m_renderConfig.m_clearColor);
+                DrawPixel(i,j,m_renderConfig.m_clearColor);
             }
         } 
     }
@@ -307,8 +315,15 @@ public class TinyRenderer : MonoBehaviour
         Clear(); 
         Profiler.EndSample();
         DrawHeadModel();
-        this.m_texture2D.Apply();
+        Buf2Screen();
         Profiler.EndSample();
+    }
+
+    void Buf2Screen()
+    {
+        //#ltd opt setpixel data
+        this.m_texture2D.SetPixels(this.m_frameBuf);
+        this.m_texture2D.Apply();
     }
 
     /// <summary>
