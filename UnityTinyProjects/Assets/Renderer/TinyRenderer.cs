@@ -6,7 +6,8 @@ public class TinyRenderer : MonoBehaviour
 {
     public RawImage m_rawImage;
     public Camera m_camera;
-    public bool m_useNativeUnityRendering;
+    public RendererConfig m_renderConfig;
+
     private Texture2D m_texture2D;
 
     [SerializeField]
@@ -103,7 +104,7 @@ public class TinyRenderer : MonoBehaviour
     /// </summary>
     void OnOffUnityNativeRendering()
     {
-        if (m_useNativeUnityRendering)
+        if (m_renderConfig.m_useUnityNativeRendering)
         {
             //render all layers
             m_camera.cullingMask = -1;
