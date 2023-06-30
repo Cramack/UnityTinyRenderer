@@ -37,7 +37,7 @@ public class TinyRenderer : MonoBehaviour
     }
 
     //Bresenham’s Line Drawing Algorithm
-    void DrawLine(int x0, int y0, int x1, int y1, Color color)
+    void DrawLineInPixels(int x0, int y0, int x1, int y1, Color color)
     {
         bool steep = false;
         if (Mathf.Abs(x0 - x1) < Mathf.Abs(y0 - y1))
@@ -140,18 +140,48 @@ public class TinyRenderer : MonoBehaviour
         var y0=(int)((v0.y)*Screen.height*0.5)+Screen.height/2;
         var x1=(int)((v1.x)*Screen.width*0.5)+Screen.width/2;
         var y1=(int)((v1.y)*Screen.height*0.5)+Screen.height/2;
-        DrawLine(x0,y0,x1,y1,color);
+        DrawLineInPixels(x0,y0,x1,y1,color);
     }
     
     void DrawTri(Vector3 v0,Vector3 v1,Vector3 v2)
     {
         // get random color 
         DrawLine(v0,v1,Color.black);   
+        DrawLine(v1,v2,Color.black);
+        DrawLine(v2,v0,Color.black);
+    }
+
+    void DrawTriInPixels(Vector2Int v0,Vector2Int v1,Vector2Int v2,Color color)
+    {
+        DrawLineInPixels(v0.x,v0.y,v1.x,v1.y,color);
+        DrawLineInPixels(v1.x,v1.y,v2.x,v2.y,color);
+        DrawLineInPixels(v2.x,v2.y,v0.x,v0.y,color);
+    }
+
+    void DrawTriInPixels(int x0, int y0, int x1, int y1, int x2, int y2,Color color)
+    {
+        var v0 = new Vector2Int(x0, y0); 
+        var v1 = new Vector2Int(x1, y1);
+        var v2 = new Vector2Int(x2, y2);
+        DrawTriInPixels(v0,v1,v2,color);
+    }
+    
+    void RenderTestDrawWireTriangles()
+    {
+        DrawTriInPixels(10,70,50,160,70,80,Color.red);
+        DrawTriInPixels(180,50,150,1,70,180,Color.white);
+        DrawTriInPixels(180,150,120,160,130,180,Color.green);
+    }
+    
+    void RenderTestFillTriangles()
+    {
+        
     }
 
     void Render()
     {
-        DrawHeadModel();
+        // DrawHeadModel();
+        RenderTestDrawWireTriangles();
         this.m_texture2D.Apply();
     }
 
