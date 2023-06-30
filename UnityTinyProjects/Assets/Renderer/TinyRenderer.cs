@@ -264,24 +264,37 @@ public class TinyRenderer : MonoBehaviour
             }
         } 
     }
+
+    public bool m_drawGreenLine = false;
+
+    void TestLineDrawing()
+    {
+        DrawLineInPixels(13,20,80,40,Color.blue);
+        DrawLineInPixels(20,13,40,80,Color.red);
+        if (m_drawGreenLine)
+        {
+            DrawLineInPixels(80,40,13,20,Color.green);
+        }
+    }
     
     void Render()
     {
         Clear(); 
+        TestLineDrawing();
         
-        if (m_drawMode == DrawMode.Line)
-        {
-            RenderTestDrawWireTriangles();
-        }
-        else if (m_drawMode==DrawMode.Filled)
-        {
-            RenderTestFillTriangles();
-        }
-        else
-        {
-            RenderTestDrawWireTriangles();
-            RenderTestFillTriangles();
-        }
+        // if (m_drawMode == DrawMode.Line)
+        // {
+        //     RenderTestDrawWireTriangles();
+        // }
+        // else if (m_drawMode==DrawMode.Filled)
+        // {
+        //     RenderTestFillTriangles();
+        // }
+        // else
+        // {
+        //     RenderTestDrawWireTriangles();
+        //     RenderTestFillTriangles();
+        // }
         
         this.m_texture2D.Apply();
     }
