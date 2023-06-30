@@ -261,12 +261,25 @@ public class TinyRenderer : MonoBehaviour
         var top = points[0];
         var mid = points[1];
         var bot = points[2];
+        
+        var tb_k=(float)(top.X-bot.X)/(top.Y-bot.Y);
+        var tm_k=(float)(top.X-mid.X)/(top.Y-mid.Y);
         //draw top part
         for (int y = top.Y; y>=mid.Y; y--)
         {
-            DrawPixel(top.X,y,color);
+            var tb_x = (int)(tb_k*(y-bot.Y)+bot.X);
+            var tm_x = (int)(tm_k*(y-mid.Y)+mid.X);
+            DrawLineInPixels(tb_x,y,tm_x,y,color);
         }
         
+        var mb_k=(float)(mid.X-bot.X)/(mid.Y-bot.Y);
+        //draw bottom part
+        for (int y = mid.Y-1; y >=bot.Y; y--)
+        {
+            var tb_x = (int)(tb_k*(y-bot.Y)+bot.X);
+            var mb_x = (int)(mb_k*(y-bot.Y)+bot.X);
+            DrawLineInPixels(tb_x,y,mb_x,y,color);
+        }
     }
 
     
