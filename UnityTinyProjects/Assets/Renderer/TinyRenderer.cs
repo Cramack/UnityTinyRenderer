@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
@@ -191,20 +192,28 @@ public class TinyRenderer : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    int m_drawTriLimit=5;
 
     void DrawHeadModel()
     {
+        Profiler.BeginSample("DrawHeadModel");
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
+        var drawTriCount = 0;
         for (int i = 0; i < triangles.Length; i+=3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
-            DrawTri(v0,v1,v2);
+            DrawTri(v0,v1,v2,Color.blue);
+            drawTriCount++;
+            if(drawTriCount>m_drawTriLimit)
+                break;
         }
+        Profiler.EndSample();
     }
 
     void DrawLine(Vector3 v0, Vector3 v1,Color color)
@@ -216,12 +225,15 @@ public class TinyRenderer : MonoBehaviour
         DrawLineInPixels(x0,y0,x1,y1,color);
     }
     
-    void DrawTri(Vector3 v0,Vector3 v1,Vector3 v2)
+    void DrawTri(Vector3 v0,Vector3 v1,Vector3 v2,Color color)
     {
-        // get random color 
-        DrawLine(v0,v1,Color.black);   
-        DrawLine(v1,v2,Color.black);
-        DrawLine(v2,v0,Color.black);
+        var x0=(int)((v0.x)*Screen.width*0.5)+Screen.width/2;;
+        var y0=(int)((v0.y)*Screen.height*0.5)+Screen.height/2;
+        var x1=(int)((v1.x)*Screen.width*0.5)+Screen.width/2;
+        var y1=(int)((v1.y)*Screen.height*0.5)+Screen.height/2;
+        var x2=(int)((v2.x)*Screen.width*0.5)+Screen.width/2;
+        var y2=(int)((v2.y)*Screen.height*0.5)+Screen.height/2;
+        DrawTriInFilled(x0,y0,x1,y1,x2,y2,color);
     }
 
     void DrawTriInPixels(Vector2Int v0,Vector2Int v1,Vector2Int v2,Color color)
@@ -237,13 +249,6 @@ public class TinyRenderer : MonoBehaviour
         var v1 = new Vector2Int(x1, y1);
         var v2 = new Vector2Int(x2, y2);
         DrawTriInPixels(v0,v1,v2,color);
-    }
-    
-    void RenderTestDrawWireTriangles()
-    {
-        DrawTriInPixels(10,70,50,160,70,80,Color.red);
-        DrawTriInPixels(180,50,150,1,70,180,Color.white);
-        DrawTriInPixels(180,150,120,160,130,180,Color.green);
     }
 
     void DrawTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
@@ -282,14 +287,6 @@ public class TinyRenderer : MonoBehaviour
         }
     }
 
-    
-    void RenderTestFillTriangles()
-    {
-        DrawTriInFilled(10,70,50,160,70,80,Color.red);
-        DrawTriInFilled(180,50,150,1,70,180,Color.white);
-        DrawTriInFilled(180,150,120,160,130,180,Color.green);
-        
-    }
 
     void Clear()
     {
@@ -302,46 +299,16 @@ public class TinyRenderer : MonoBehaviour
         } 
     }
 
-    public bool m_drawGreenLine = false;
-
-    void TestLineDrawing()
-    {
-        DrawLineInPixels(13,20,80,40,Color.blue);
-        DrawLineInPixels(20,13,40,80,Color.red);
-        if (m_drawGreenLine)
-        {
-            DrawLineInPixels(80,40,13,20,Color.green);
-        }
-        
-        //draw a horizontal line
-        DrawLineInPixels(100,20,200,20,Color.cyan);
-        
-        //draw a vertical line
-        DrawLineInPixels(150,20,150,120,Color.yellow);
-        
-        //draw a point 
-        DrawLineInPixels(200,200,200,200,Color.magenta);
-    }
-    
     void Render()
     {
+        Profiler.BeginSample("Render");
+        
+        Profiler.BeginSample("Clear");
         Clear(); 
-        
-        if (m_drawMode == DrawMode.Line)
-        {
-            RenderTestDrawWireTriangles();
-        }
-        else if (m_drawMode==DrawMode.Filled)
-        {
-            RenderTestFillTriangles();
-        }
-        else
-        {
-            RenderTestDrawWireTriangles();
-            RenderTestFillTriangles();
-        }
-        
+        Profiler.EndSample();
+        DrawHeadModel();
         this.m_texture2D.Apply();
+        Profiler.EndSample();
     }
 
     /// <summary>
