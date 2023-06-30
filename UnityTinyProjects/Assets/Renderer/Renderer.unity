@@ -294,7 +294,9 @@ MonoBehaviour:
   m_rawImage: {fileID: 2092009899}
   m_camera: {fileID: 1394683666}
   m_renderConfig: {fileID: 11400000, guid: cae4a6a4414add24faa3cec6ab00624e, type: 2}
+  m_drawMode: 0
   m_headModel: {fileID: 1916537406}
+  m_useMyLineDrawing: 0
 --- !u!1 &1536601082
 GameObject:
   m_ObjectHideFlags: 0
