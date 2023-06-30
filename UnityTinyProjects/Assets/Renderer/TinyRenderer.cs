@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -178,30 +179,21 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
     {
-        var topX = 0;
-        var topY = 0;
-        if (y0 >= y1 && y0 >= y2)
+        List<(int X, int Y)> points = new List<(int X, int Y)>()
         {
-            topY = y0;
-            topX = x0;
-        }
-        else if (y1 >= y2)
-        {
-            topY=y1;
-            topX=x1;
-        }
-        else 
-        {
-            topY=y2;
-            topX=x2;
-        }
-        
-        DrawPixel(topX,topY,color);
-        
-        
-        
-        //degenerate triangle #ltd
+            (x0, y0),
+            (x1, y1),
+            (x2, y2)
+        };
+
+        // Sort the points based on their Y value.
+        points.Sort((a, b) => b.Y.CompareTo(a.Y));
+
+        DrawPixel(points[0].X, points[0].Y, color); //top point
+        DrawPixel(points[1].X, points[1].Y, color); //mid point
+        DrawPixel(points[2].X, points[2].Y, color); //bot point
     }
+
     
     void RenderTestFillTriangles()
     {
