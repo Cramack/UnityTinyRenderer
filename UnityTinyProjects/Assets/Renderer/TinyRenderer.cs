@@ -53,29 +53,32 @@ public class TinyRenderer : MonoBehaviour
     void DrawLineInPixelsV1(int x0, int y0, int x1, int y1, Color color)
     {
         //#ltd handle degenerate cases
+        
+        //
         float k=(y1-y0)/(float)(x1-x0);
-          
-        var leftx = 0;
-        var lefty=0;
-        var rightx=0;
-        var righty=0;
-        if (x0 >= x1)
+        
+        var startP = x0;
+        var startQ=y0;
+        var endP=x1;
+        var endQ=y1;
+        var usePAsX = true;
+        
+        if (startP> endP)
         {
-            leftx=x1;
-            lefty=y1;
-            rightx=x0;
-        }
-        else
-        {
-            leftx=x0;
-            lefty=y0;
-            rightx=x1;
+            (startP,startQ)=(endP,endQ);
         }
         
-        for (int x = leftx; x <= rightx; x++)
+        for (int p = startP; p <= endP; p++)
         {
-            int y = (int)(k * (x - leftx) + lefty);
-            DrawPixel(x, y, color);
+            int q = (int)(k * (p - startP) + startQ);
+            if (usePAsX)
+            {
+                DrawPixel(p, q, color);
+            }
+            else
+            {
+                DrawPixel(q, p, color);
+            }
         }
     }
 
