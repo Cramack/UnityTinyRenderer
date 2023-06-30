@@ -293,7 +293,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_rawImage: {fileID: 2092009899}
   m_camera: {fileID: 1394683666}
-  m_useNativeUnityRendering: 1
+  m_useNativeUnityRendering: 0
   m_headModel: {fileID: 1916537406}
 --- !u!1 &1536601082
 GameObject:

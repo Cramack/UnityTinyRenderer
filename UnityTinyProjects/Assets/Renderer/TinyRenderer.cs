@@ -24,6 +24,7 @@ public class TinyRenderer : MonoBehaviour
         Debug.Log("Screen.width:" + Screen.width + " Screen.height:" + Screen.height);
         m_texture2D = new Texture2D(Screen.width, Screen.height);
         m_texture2D.filterMode = FilterMode.Point;
+        m_texture2D.wrapMode= TextureWrapMode.Clamp;
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
     }
@@ -121,20 +122,35 @@ public class TinyRenderer : MonoBehaviour
     {
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
+        var triangles = mesh.triangles;
         var vertices = mesh.vertices;
-
-        foreach (var vertex in vertices)
+        for (int i = 0; i < triangles.Length; i+=3)
         {
+            var v0 = vertices[triangles[i]];
+            var v1 = vertices[triangles[i + 1]];
+            var v2 = vertices[triangles[i + 2]];
+            DrawTri(v0,v1,v2);
         }
+    }
 
-      
+    void DrawLine(Vector3 v0, Vector3 v1,Color color)
+    {
+        var x0=(int)((v0.x)*Screen.width*0.5)+Screen.width/2;; 
+        var y0=(int)((v0.y)*Screen.height*0.5)+Screen.height/2;
+        var x1=(int)((v1.x)*Screen.width*0.5)+Screen.width/2;
+        var y1=(int)((v1.y)*Screen.height*0.5)+Screen.height/2;
+        DrawLine(x0,y0,x1,y1,color);
+    }
+    
+    void DrawTri(Vector3 v0,Vector3 v1,Vector3 v2)
+    {
+        // get random color 
+        DrawLine(v0,v1,Color.black);   
     }
 
     void Render()
     {
-        // DrawHeadModel();
-        this.m_texture2D.SetPixel(0,0,Color.red);
-        this.m_texture2D.SetPixel(Screen.width-1,Screen.height-1,Color.blue);
+        DrawHeadModel();
         this.m_texture2D.Apply();
     }
 
