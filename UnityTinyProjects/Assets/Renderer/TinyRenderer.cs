@@ -55,7 +55,6 @@ public class TinyRenderer : MonoBehaviour
         //#ltd handle degenerate cases
         
         //
-        float k=(y1-y0)/(float)(x1-x0);
         
         var startP = x0;
         var startQ=y0;
@@ -68,9 +67,12 @@ public class TinyRenderer : MonoBehaviour
             (startP,startQ)=(endP,endQ);
         }
         
+        //k how q changes with p
+        float k_pq=(endQ-startQ)/(float)(endP-startP);
+        
         for (int p = startP; p <= endP; p++)
         {
-            int q = (int)(k * (p - startP) + startQ);
+            int q = (int)(k_pq * (p - startP) + startQ);
             if (usePAsX)
             {
                 DrawPixel(p, q, color);
