@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -54,32 +55,42 @@ public class TinyRenderer : MonoBehaviour
     {
         //#ltd handle degenerate cases
         
-        //
+        //steep means y change is bigger than x change
+        bool steep = Math.Abs(y1-y0)>Math.Abs(x1-x0);
         
-        var startP = x0;
-        var startQ=y0;
-        var endP=x1;
-        var endQ=y1;
-        var usePAsX = true;
-        
+        var startP =0;
+        var startQ=0;
+        var endP=0;
+        var endQ=0;
+        //if steep, we use y as p, x as q; which means draw p as y and q as x
+        if (steep)
+        {
+            startP=y0; startQ=x0;endP=y1;endQ=x1;
+        }
+        else
+        {
+            startP=x0; startQ=y0;endP=x1;endQ=y1;
+        }
+
+        //make sure startP is smaller than endP.
         if (startP> endP)
         {
             (startP,startQ)=(endP,endQ);
         }
         
-        //k how q changes with p
+        //how q changes with p
         float k_pq=(endQ-startQ)/(float)(endP-startP);
         
         for (int p = startP; p <= endP; p++)
         {
             int q = (int)(k_pq * (p - startP) + startQ);
-            if (usePAsX)
+            if (steep)
             {
-                DrawPixel(p, q, color);
+                DrawPixel(q, p, color);
             }
             else
             {
-                DrawPixel(q, p, color);
+                DrawPixel(p, q, color);
             }
         }
     }
