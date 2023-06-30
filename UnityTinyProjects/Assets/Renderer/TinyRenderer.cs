@@ -75,7 +75,7 @@ public class TinyRenderer : MonoBehaviour
         //make sure startP is smaller than endP.
         if (startP> endP)
         {
-            (startP,startQ)=(endP,endQ);
+            (startP,startQ,endP,endQ)=(endP,endQ,startP,startQ);
         }
 
 
@@ -313,21 +313,20 @@ public class TinyRenderer : MonoBehaviour
     void Render()
     {
         Clear(); 
-        TestLineDrawing();
         
-        // if (m_drawMode == DrawMode.Line)
-        // {
-        //     RenderTestDrawWireTriangles();
-        // }
-        // else if (m_drawMode==DrawMode.Filled)
-        // {
-        //     RenderTestFillTriangles();
-        // }
-        // else
-        // {
-        //     RenderTestDrawWireTriangles();
-        //     RenderTestFillTriangles();
-        // }
+        if (m_drawMode == DrawMode.Line)
+        {
+            RenderTestDrawWireTriangles();
+        }
+        else if (m_drawMode==DrawMode.Filled)
+        {
+            RenderTestFillTriangles();
+        }
+        else
+        {
+            RenderTestDrawWireTriangles();
+            RenderTestFillTriangles();
+        }
         
         this.m_texture2D.Apply();
     }
