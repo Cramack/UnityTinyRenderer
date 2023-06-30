@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +8,10 @@ public class TinyRenderer : MonoBehaviour
     public RendererConfig m_renderConfig;
 
     private Texture2D m_texture2D;
+
+
+    public bool m_drawLine;
+    
 
     [SerializeField]
     GameObject m_headModel;
@@ -172,16 +175,48 @@ public class TinyRenderer : MonoBehaviour
         DrawTriInPixels(180,50,150,1,70,180,Color.white);
         DrawTriInPixels(180,150,120,160,130,180,Color.green);
     }
+
+    void DrawTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
+    {
+        var topX = 0;
+        var topY = 0;
+        if (y0 >= y1 && y0 >= y2)
+        {
+            topY = y0;
+            topX = x0;
+        }
+        else if (y1 >= y2)
+        {
+            topY=y1;
+            topX=x1;
+        }
+        else 
+        {
+            topY=y2;
+            topX=x2;
+        }
+        //degenerate triangle #ltd
+    }
     
     void RenderTestFillTriangles()
     {
+        DrawTriInFilled(10,70,50,160,70,80,Color.red);
+        DrawTriInFilled(180,50,150,1,70,180,Color.white);
+        DrawTriInFilled(180,150,120,160,130,180,Color.green);
         
     }
 
     void Render()
     {
-        // DrawHeadModel();
-        RenderTestDrawWireTriangles();
+        if (m_drawLine)
+        {
+            RenderTestDrawWireTriangles();
+        }
+        else
+        {
+            RenderTestFillTriangles();
+        }
+        
         this.m_texture2D.Apply();
     }
 
