@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class TinyRenderer : MonoBehaviour
@@ -47,9 +48,21 @@ public class TinyRenderer : MonoBehaviour
         SetupRenderingEnv();
     }
 
+    public bool m_useMyLineDrawing = false;
+    void DrawLineInPixelsV1(int x0, int y0, int x1, int y1, Color color)
+    {
+           
+    }
+
     //Bresenham’s Line Drawing Algorithm
     void DrawLineInPixels(int x0, int y0, int x1, int y1, Color color)
     {
+        if (m_useMyLineDrawing)
+        {
+            DrawLineInPixelsV1(x0, y0, x1, y1, color);
+            return;
+        }
+        
         bool steep = false;
         if (Mathf.Abs(x0 - x1) < Mathf.Abs(y0 - y1))
         {
