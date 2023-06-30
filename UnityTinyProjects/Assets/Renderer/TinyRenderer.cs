@@ -49,14 +49,34 @@ public class TinyRenderer : MonoBehaviour
     }
 
     public bool m_useMyLineDrawing = false;
+    
     void DrawLineInPixelsV1(int x0, int y0, int x1, int y1, Color color)
     {
-          float k=(y1-y0)/(float)(x1-x0);
-          for (int x = x0; x <= x1; x++)
-          {
-                int y = (int)(k * (x - x0) + y0);
-                DrawPixel(x, y, color);
-          }
+        //#ltd handle degenerate cases
+        float k=(y1-y0)/(float)(x1-x0);
+          
+        var leftx = 0;
+        var lefty=0;
+        var rightx=0;
+        var righty=0;
+        if (x0 >= x1)
+        {
+            leftx=x1;
+            lefty=y1;
+            rightx=x0;
+        }
+        else
+        {
+            leftx=x0;
+            lefty=y0;
+            rightx=x1;
+        }
+        
+        for (int x = leftx; x <= rightx; x++)
+        {
+            int y = (int)(k * (x - leftx) + lefty);
+            DrawPixel(x, y, color);
+        }
     }
 
     //Bresenham’s Line Drawing Algorithm
