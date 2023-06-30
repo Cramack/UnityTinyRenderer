@@ -206,8 +206,21 @@ public class TinyRenderer : MonoBehaviour
         
     }
 
+    void Clear()
+    {
+        for (int i = 0; i < m_texture2D.width; i++)
+        {
+            for (int j = 0; j < m_texture2D.height; j++)
+            {
+                m_texture2D.SetPixel(i,j,m_renderConfig.m_clearColor);
+            }
+        } 
+    }
+    
     void Render()
     {
+        Clear(); 
+        
         if (m_drawLine)
         {
             RenderTestDrawWireTriangles();

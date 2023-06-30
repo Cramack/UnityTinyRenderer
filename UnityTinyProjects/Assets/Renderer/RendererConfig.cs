@@ -4,5 +4,6 @@ using UnityEngine;
 public class RendererConfig : ScriptableObject 
 {
     public bool m_useUnityNativeRendering = false;
+    public Color m_clearColor = Color.black;
 
 }
