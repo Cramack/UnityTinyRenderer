@@ -356,7 +356,7 @@ public class TinyRenderer : MonoBehaviour
 
     void Clear()
     {
-        RenderingHelper.FillArray(this.m_frameBuf, m_renderConfig.m_clearColor);
+        RenderingHelper.FillArrayV2(this.m_frameBuf, m_renderConfig.m_clearColor);
     }
 
     void Render()
