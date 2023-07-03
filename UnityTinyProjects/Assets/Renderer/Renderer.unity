@@ -297,7 +297,7 @@ MonoBehaviour:
   m_drawMode: 0
   m_headModel: {fileID: 1916537406}
   m_useMyLineDrawing: 1
-  m_drawTriLimit: 4
+  m_light: {fileID: 2044785333}
 --- !u!1 &1536601082
 GameObject:
   m_ObjectHideFlags: 0

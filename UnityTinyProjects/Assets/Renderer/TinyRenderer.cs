@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Profiling;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class TinyRenderer : MonoBehaviour
@@ -14,6 +13,8 @@ public class TinyRenderer : MonoBehaviour
     private Texture2D m_texture2D;
 
     Color[] m_frameBuf;
+    
+    
 
 
     public DrawMode m_drawMode = DrawMode.All;
@@ -182,20 +183,10 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawPixel(int x, int y, Color color)
     {
-        try
-        {
-            if(x<0 || x>=this.m_texture2D.width || y<0 || y>=this.m_texture2D.height)
-                return;
-            
-            this.m_frameBuf[x + this.m_texture2D.width * y] = color;
-        }
-        catch (Exception e)
-        {
-            Debug.LogError(e.ToString());
-            Debug.LogError("x:" + x + " y:" + y + " width:" + this.m_texture2D.width + " height:" +
-                           this.m_texture2D.height);
-            ;
-        }
+        if (x < 0 || x >= this.m_texture2D.width || y < 0 || y >= this.m_texture2D.height)
+            return;
+
+        this.m_frameBuf[x + this.m_texture2D.width * y] = color;
     }
 
     /// <summary>
@@ -271,7 +262,7 @@ public class TinyRenderer : MonoBehaviour
         var y1 = (int)((v1.y) * Screen.height * 0.5) + Screen.height / 2;
         var x2 = (int)((v2.x) * Screen.width * 0.5) + Screen.width / 2;
         var y2 = (int)((v2.y) * Screen.height * 0.5) + Screen.height / 2;
-        DrawTriInFilled(x0, y0, x1, y1, x2, y2, color);
+        RenderTriInFilled(x0, y0, x1, y1, x2, y2, color);
     }
 
     void DrawTriInPixels(Vector2Int v0, Vector2Int v1, Vector2Int v2, Color color)
@@ -288,9 +279,29 @@ public class TinyRenderer : MonoBehaviour
         var v2 = new Vector2Int(x2, y2);
         DrawTriInPixels(v0, v1, v2, color);
     }
+    
+    
 
-    void DrawTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
+    void RenderTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
     {
+        //get bbox 
+        var bbox=BBoxInt2D.GetBBox(Vector2Int.zero, new Vector2Int(this.m_texture2D.width-1, this.m_texture2D.height-1), 
+            new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
+
+        var point = Vector2Int.zero;
+
+        for (point.x= bbox.m_min.x; point.x<=bbox.m_max.x; point.x++)
+        {
+            for (point.y = bbox.m_min.y; point.y<=bbox.m_max.y; point.y++)
+            {
+                var barycentric =RenderingHelper.BaryCentric(point, new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
+                if(barycentric.x<0||barycentric.y<0||barycentric.z<0)
+                    continue;
+                DrawPixel(point.x,point.y,color);
+            } 
+        }
+        
+        
         List<(int X, int Y)> points = new List<(int X, int Y)>()
         {
             (x0, y0),
