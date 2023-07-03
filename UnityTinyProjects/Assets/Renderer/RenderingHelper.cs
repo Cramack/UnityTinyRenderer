@@ -10,11 +10,21 @@ public static class RenderingHelper
         var cross=Vector3.Cross(a,b);
         
         //triangle is degenerate
-        if(cross.z==0)
+        if(cross.z<1)
         {
             return new Vector3(-1,1,1);
         }
         
         return new Vector3(1-(cross.x+cross.y)/cross.z,cross.x/cross.z,cross.y/cross.z);
     }
+
+    public static void FillArray<T>(T[] arr, T value)
+    {
+        int len=arr.Length;
+        for (int i = 0; i < len; i++)
+        {
+           arr[i]=value; 
+        }
+    }
+    
 }

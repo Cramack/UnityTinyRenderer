@@ -304,65 +304,59 @@ public class TinyRenderer : MonoBehaviour
         }
         
         
-        List<(int X, int Y)> points = new List<(int X, int Y)>()
-        {
-            (x0, y0),
-            (x1, y1),
-            (x2, y2)
-        };
-
-        // Sort the points based on their Y value.
-        points.Sort((a, b) => b.Y.CompareTo(a.Y));
-
-        var top = points[0];
-        var mid = points[1];
-        var bot = points[2];
-
-        //degenerate to a point 
-        if (top.Y == bot.Y)
-        {
-            DrawPixel(top.X, top.Y, color);
-            return;
-        }
-
-        var tb_k = (float)(top.X - bot.X) / (top.Y - bot.Y);
-
-        if (top.Y != mid.Y) // if topy=midy no up triangle
-        {
-            var tm_k = (float)(top.X - mid.X) / (top.Y - mid.Y);
-            //draw top part
-            for (int y = top.Y; y >= mid.Y; y--)
-            {
-                var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
-                var tm_x = (int)(tm_k * (y - mid.Y) + mid.X);
-                DrawLineInPixels(tb_x, y, tm_x, y, color);
-            }
-        }
-
-
-        if (mid.Y != bot.Y) // if midy=boty no bottom triangle
-        {
-            var mb_k = (float)(mid.X - bot.X) / (mid.Y - bot.Y);
-            //draw bottom part
-            for (int y = mid.Y; y >= bot.Y; y--)
-            {
-                var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
-                var mb_x = (int)(mb_k * (y - bot.Y) + bot.X);
-                DrawLineInPixels(tb_x, y, mb_x, y, color);
-            }
-        }
+        // List<(int X, int Y)> points = new List<(int X, int Y)>()
+        // {
+        //     (x0, y0),
+        //     (x1, y1),
+        //     (x2, y2)
+        // };
+        //
+        // // Sort the points based on their Y value.
+        // points.Sort((a, b) => b.Y.CompareTo(a.Y));
+        //
+        // var top = points[0];
+        // var mid = points[1];
+        // var bot = points[2];
+        //
+        // //degenerate to a point 
+        // if (top.Y == bot.Y)
+        // {
+        //     DrawPixel(top.X, top.Y, color);
+        //     return;
+        // }
+        //
+        // var tb_k = (float)(top.X - bot.X) / (top.Y - bot.Y);
+        //
+        // if (top.Y != mid.Y) // if topy=midy no up triangle
+        // {
+        //     var tm_k = (float)(top.X - mid.X) / (top.Y - mid.Y);
+        //     //draw top part
+        //     for (int y = top.Y; y >= mid.Y; y--)
+        //     {
+        //         var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
+        //         var tm_x = (int)(tm_k * (y - mid.Y) + mid.X);
+        //         DrawLineInPixels(tb_x, y, tm_x, y, color);
+        //     }
+        // }
+        //
+        //
+        // if (mid.Y != bot.Y) // if midy=boty no bottom triangle
+        // {
+        //     var mb_k = (float)(mid.X - bot.X) / (mid.Y - bot.Y);
+        //     //draw bottom part
+        //     for (int y = mid.Y; y >= bot.Y; y--)
+        //     {
+        //         var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
+        //         var mb_x = (int)(mb_k * (y - bot.Y) + bot.X);
+        //         DrawLineInPixels(tb_x, y, mb_x, y, color);
+        //     }
+        // }
     }
 
 
     void Clear()
     {
-        for (int i = 0; i < m_texture2D.width; i++)
-        {
-            for (int j = 0; j < m_texture2D.height; j++)
-            {
-                DrawPixel(i, j, m_renderConfig.m_clearColor);
-            }
-        }
+        RenderingHelper.FillArray(this.m_frameBuf, m_renderConfig.m_clearColor);
     }
 
     void Render()
