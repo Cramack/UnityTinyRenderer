@@ -217,22 +217,36 @@ public class TinyRenderer : MonoBehaviour
         }
     }
 
+    [SerializeField]
+    Light m_light;
 
     void DrawHeadModel()
     {
         Profiler.BeginSample("DrawHeadModel");
+        
+        // light direction 
+        var lightReflectDir = Vector3.forward;
+        
+        
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
-        var drawTriCount = 0;
         for (int i = 0; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
-            DrawTri(v0, v1, v2, Color.blue);
-            drawTriCount++;
+            
+            //plane normal 
+            var planeNormal = Vector3.Cross(v1 - v0, v2 - v0).normalized;
+            
+            //light intensity
+            var lightIntensity = Vector3.Dot(planeNormal, lightReflectDir);
+            
+            if(lightIntensity<0)
+                continue;
+            DrawTri(v0, v1, v2, m_light.color*lightIntensity);
         }
 
         Profiler.EndSample();
