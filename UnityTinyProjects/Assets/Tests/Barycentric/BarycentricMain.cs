@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -18,13 +19,35 @@ public class BarycentricMain : MonoBehaviour
         Gizmos.DrawLine(m_b.transform.position, m_c.transform.position);
         Gizmos.DrawLine(m_c.transform.position, m_a.transform.position);
         
+        //draw labels
         Handles.Label(m_a.transform.position,"A");
         Handles.Label(m_b.transform.position,"B");
         Handles.Label(m_c.transform.position,"C");
         Handles.Label(m_p.transform.position,"P");
         
+        //draw ap
+        Gizmos.DrawLine(this.m_a.transform.position, this.m_p.transform.position);
         
+        //draw cross product of ba and ac
+        var ba = this.m_a.transform.position - this.m_b.transform.position;
+        var ac = this.m_c.transform.position - this.m_a.transform.position;
+        var perpabc = Vector3.Cross(ba, ac).normalized;
+        var perpabcEnd= this.m_a.transform.position + perpabc*10f;
+        Gizmos.DrawLine(this.m_a.transform.position, perpabcEnd);
+        Gizmos.DrawSphere(perpabcEnd,0.5f);
+        var style=new GUIStyle();
+        style.normal.textColor = Color.yellow;
+        Handles.Label(perpabcEnd+Vector3.up*1.5f,"ABCPerp",style);
         
+        //draw p projection
+        var ap= this.m_p.transform.position - this.m_a.transform.position;
+        var projScale = Vector3.Dot(ap, perpabc);
+        var projPointOnPerpAbc = this.m_p.transform.position - projScale * perpabc; 
+        Gizmos.DrawLine(this.m_p.transform.position, projPointOnPerpAbc);
+        Gizmos.DrawSphere(projPointOnPerpAbc,0.5f);
+        Handles.Label(projPointOnPerpAbc+Vector3.up*1.5f,"P'",style);
+        
+
         // var startColor = m_a.GetComponent<MeshRenderer>().sharedMaterial.color;
         // var endColor = m_b.GetComponent<MeshRenderer>().sharedMaterial.color;
         //
