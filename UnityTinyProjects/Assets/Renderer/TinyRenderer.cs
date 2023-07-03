@@ -179,6 +179,8 @@ public class TinyRenderer : MonoBehaviour
             }
         }
     }
+    
+    
 
 
     void DrawPixel(int x, int y, Color color)
