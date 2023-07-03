@@ -16,15 +16,15 @@ public class TinyRenderer : MonoBehaviour
     Color[] m_frameBuf;
 
 
-    public DrawMode m_drawMode=DrawMode.All;
-    
-    public enum DrawMode 
+    public DrawMode m_drawMode = DrawMode.All;
+
+    public enum DrawMode
     {
         Line,
         Filled,
         All
     }
-    
+
 
     [SerializeField]
     GameObject m_headModel;
@@ -42,15 +42,13 @@ public class TinyRenderer : MonoBehaviour
         //set up screen
         m_texture2D = new Texture2D(Screen.width, Screen.height);
         m_texture2D.filterMode = FilterMode.Point;
-        m_texture2D.wrapMode= TextureWrapMode.Clamp;
+        m_texture2D.wrapMode = TextureWrapMode.Clamp;
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
-        
+
         //frame buf 
-        m_frameBuf = new Color[Screen.width* Screen.height];
+        m_frameBuf = new Color[Screen.width * Screen.height];
     }
-    
-    
 
 
     void Init()
@@ -59,45 +57,51 @@ public class TinyRenderer : MonoBehaviour
     }
 
     public bool m_useMyLineDrawing = false;
-    
+
     void DrawLineInPixelsV1(int x0, int y0, int x1, int y1, Color color)
     {
         //#ltd handle degenerate cases
-        
+
         //steep means y change is bigger than x change
-        bool steep = Math.Abs(y1-y0)>Math.Abs(x1-x0);
-        
-        var startP =0;
-        var startQ=0;
-        var endP=0;
-        var endQ=0;
+        bool steep = Math.Abs(y1 - y0) > Math.Abs(x1 - x0);
+
+        var startP = 0;
+        var startQ = 0;
+        var endP = 0;
+        var endQ = 0;
         //if steep, we use y as p, x as q; which means draw p as y and q as x
         if (steep)
         {
-            startP=y0; startQ=x0;endP=y1;endQ=x1;
+            startP = y0;
+            startQ = x0;
+            endP = y1;
+            endQ = x1;
         }
         else
         {
-            startP=x0; startQ=y0;endP=x1;endQ=y1;
+            startP = x0;
+            startQ = y0;
+            endP = x1;
+            endQ = y1;
         }
 
         //make sure startP is smaller than endP.
-        if (startP> endP)
+        if (startP > endP)
         {
-            (startP,startQ,endP,endQ)=(endP,endQ,startP,startQ);
+            (startP, startQ, endP, endQ) = (endP, endQ, startP, startQ);
         }
 
 
         //handle degenerate cases
         if (endP == startP)
         {
-            DrawPixel(startP,startQ, color);
+            DrawPixel(startP, startQ, color);
             return;
         }
-        
+
         //how q changes with p
-        float k_pq=(endQ-startQ)/(float)(endP-startP);
-        
+        float k_pq = (endQ - startQ) / (float)(endP - startP);
+
         for (int p = startP; p <= endP; p++)
         {
             int q = (int)(k_pq * (p - startP) + startQ);
@@ -120,7 +124,7 @@ public class TinyRenderer : MonoBehaviour
             DrawLineInPixelsV1(x0, y0, x1, y1, color);
             return;
         }
-        
+
         bool steep = false;
         if (Mathf.Abs(x0 - x1) < Mathf.Abs(y0 - y1))
         {
@@ -178,7 +182,20 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawPixel(int x, int y, Color color)
     {
-        this.m_frameBuf[y*this.m_texture2D.width+ x] = color;
+        try
+        {
+            if(x<0 || x>=this.m_texture2D.width || y<0 || y>=this.m_texture2D.height)
+                return;
+            
+            this.m_frameBuf[x + this.m_texture2D.width * y] = color;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.ToString());
+            Debug.LogError("x:" + x + " y:" + y + " width:" + this.m_texture2D.width + " height:" +
+                           this.m_texture2D.height);
+            ;
+        }
     }
 
     /// <summary>
@@ -200,8 +217,6 @@ public class TinyRenderer : MonoBehaviour
         }
     }
 
-    [SerializeField]
-    int m_drawTriLimit=1;
 
     void DrawHeadModel()
     {
@@ -211,52 +226,53 @@ public class TinyRenderer : MonoBehaviour
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
         var drawTriCount = 0;
-        for (int i = 0; i < triangles.Length; i+=3)
+        for (int i = 0; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
-            DrawTri(v0,v1,v2,Color.blue);
+            DrawTri(v0, v1, v2, Color.blue);
             drawTriCount++;
-            if(drawTriCount>m_drawTriLimit)
-                break;
         }
+
         Profiler.EndSample();
     }
 
-    void DrawLine(Vector3 v0, Vector3 v1,Color color)
+    void DrawLine(Vector3 v0, Vector3 v1, Color color)
     {
-        var x0=(int)((v0.x)*Screen.width*0.5)+Screen.width/2;; 
-        var y0=(int)((v0.y)*Screen.height*0.5)+Screen.height/2;
-        var x1=(int)((v1.x)*Screen.width*0.5)+Screen.width/2;
-        var y1=(int)((v1.y)*Screen.height*0.5)+Screen.height/2;
-        DrawLineInPixels(x0,y0,x1,y1,color);
-    }
-    
-    void DrawTri(Vector3 v0,Vector3 v1,Vector3 v2,Color color)
-    {
-        var x0=(int)((v0.x)*Screen.width*0.5)+Screen.width/2;;
-        var y0=(int)((v0.y)*Screen.height*0.5)+Screen.height/2;
-        var x1=(int)((v1.x)*Screen.width*0.5)+Screen.width/2;
-        var y1=(int)((v1.y)*Screen.height*0.5)+Screen.height/2;
-        var x2=(int)((v2.x)*Screen.width*0.5)+Screen.width/2;
-        var y2=(int)((v2.y)*Screen.height*0.5)+Screen.height/2;
-        DrawTriInFilled(x0,y0,x1,y1,x2,y2,color);
+        var x0 = (int)((v0.x) * Screen.width * 0.5) + Screen.width / 2;
+        ;
+        var y0 = (int)((v0.y) * Screen.height * 0.5) + Screen.height / 2;
+        var x1 = (int)((v1.x) * Screen.width * 0.5) + Screen.width / 2;
+        var y1 = (int)((v1.y) * Screen.height * 0.5) + Screen.height / 2;
+        DrawLineInPixels(x0, y0, x1, y1, color);
     }
 
-    void DrawTriInPixels(Vector2Int v0,Vector2Int v1,Vector2Int v2,Color color)
+    void DrawTri(Vector3 v0, Vector3 v1, Vector3 v2, Color color)
     {
-        DrawLineInPixels(v0.x,v0.y,v1.x,v1.y,color);
-        DrawLineInPixels(v1.x,v1.y,v2.x,v2.y,color);
-        DrawLineInPixels(v2.x,v2.y,v0.x,v0.y,color);
+        var x0 = (int)((v0.x) * Screen.width * 0.5) + Screen.width / 2;
+        ;
+        var y0 = (int)((v0.y) * Screen.height * 0.5) + Screen.height / 2;
+        var x1 = (int)((v1.x) * Screen.width * 0.5) + Screen.width / 2;
+        var y1 = (int)((v1.y) * Screen.height * 0.5) + Screen.height / 2;
+        var x2 = (int)((v2.x) * Screen.width * 0.5) + Screen.width / 2;
+        var y2 = (int)((v2.y) * Screen.height * 0.5) + Screen.height / 2;
+        DrawTriInFilled(x0, y0, x1, y1, x2, y2, color);
     }
 
-    void DrawTriInPixels(int x0, int y0, int x1, int y1, int x2, int y2,Color color)
+    void DrawTriInPixels(Vector2Int v0, Vector2Int v1, Vector2Int v2, Color color)
     {
-        var v0 = new Vector2Int(x0, y0); 
+        DrawLineInPixels(v0.x, v0.y, v1.x, v1.y, color);
+        DrawLineInPixels(v1.x, v1.y, v2.x, v2.y, color);
+        DrawLineInPixels(v2.x, v2.y, v0.x, v0.y, color);
+    }
+
+    void DrawTriInPixels(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
+    {
+        var v0 = new Vector2Int(x0, y0);
         var v1 = new Vector2Int(x1, y1);
         var v2 = new Vector2Int(x2, y2);
-        DrawTriInPixels(v0,v1,v2,color);
+        DrawTriInPixels(v0, v1, v2, color);
     }
 
     void DrawTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
@@ -270,28 +286,43 @@ public class TinyRenderer : MonoBehaviour
 
         // Sort the points based on their Y value.
         points.Sort((a, b) => b.Y.CompareTo(a.Y));
-        
+
         var top = points[0];
         var mid = points[1];
         var bot = points[2];
-        
-        var tb_k=(float)(top.X-bot.X)/(top.Y-bot.Y);
-        var tm_k=(float)(top.X-mid.X)/(top.Y-mid.Y);
-        //draw top part
-        for (int y = top.Y; y>=mid.Y; y--)
+
+        //degenerate to a point 
+        if (top.Y == bot.Y)
         {
-            var tb_x = (int)(tb_k*(y-bot.Y)+bot.X);
-            var tm_x = (int)(tm_k*(y-mid.Y)+mid.X);
-            DrawLineInPixels(tb_x,y,tm_x,y,color);
+            DrawPixel(top.X, top.Y, color);
+            return;
         }
-        
-        var mb_k=(float)(mid.X-bot.X)/(mid.Y-bot.Y);
-        //draw bottom part
-        for (int y = mid.Y-1; y >=bot.Y; y--)
+
+        var tb_k = (float)(top.X - bot.X) / (top.Y - bot.Y);
+
+        if (top.Y != mid.Y) // if topy=midy no up triangle
         {
-            var tb_x = (int)(tb_k*(y-bot.Y)+bot.X);
-            var mb_x = (int)(mb_k*(y-bot.Y)+bot.X);
-            DrawLineInPixels(tb_x,y,mb_x,y,color);
+            var tm_k = (float)(top.X - mid.X) / (top.Y - mid.Y);
+            //draw top part
+            for (int y = top.Y; y >= mid.Y; y--)
+            {
+                var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
+                var tm_x = (int)(tm_k * (y - mid.Y) + mid.X);
+                DrawLineInPixels(tb_x, y, tm_x, y, color);
+            }
+        }
+
+
+        if (mid.Y != bot.Y) // if midy=boty no bottom triangle
+        {
+            var mb_k = (float)(mid.X - bot.X) / (mid.Y - bot.Y);
+            //draw bottom part
+            for (int y = mid.Y; y >= bot.Y; y--)
+            {
+                var tb_x = (int)(tb_k * (y - bot.Y) + bot.X);
+                var mb_x = (int)(mb_k * (y - bot.Y) + bot.X);
+                DrawLineInPixels(tb_x, y, mb_x, y, color);
+            }
         }
     }
 
@@ -302,17 +333,17 @@ public class TinyRenderer : MonoBehaviour
         {
             for (int j = 0; j < m_texture2D.height; j++)
             {
-                DrawPixel(i,j,m_renderConfig.m_clearColor);
+                DrawPixel(i, j, m_renderConfig.m_clearColor);
             }
-        } 
+        }
     }
 
     void Render()
     {
         Profiler.BeginSample("Render");
-        
+
         Profiler.BeginSample("Clear");
-        Clear(); 
+        Clear();
         Profiler.EndSample();
         DrawHeadModel();
         Buf2Screen();
