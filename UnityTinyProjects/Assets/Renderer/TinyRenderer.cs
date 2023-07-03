@@ -296,7 +296,7 @@ public class TinyRenderer : MonoBehaviour
         {
             for (point.y = bbox.m_min.y; point.y<=bbox.m_max.y; point.y++)
             {
-                var barycentric =RenderingHelper.BaryCentric(point, new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
+                var barycentric =RenderingHelper.BaryCentric( new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2),point);
                 if(barycentric.x<0||barycentric.y<0||barycentric.z<0)
                     continue;
                 DrawPixel(point.x,point.y,color);
@@ -367,6 +367,18 @@ public class TinyRenderer : MonoBehaviour
         Clear();
         Profiler.EndSample();
         DrawHeadModel();
+        
+        // var v0=new Vector2Int(0,0);
+        // var v1=new Vector2Int(100,100);
+        // var v2=new Vector2Int(200,50);
+        //
+        // DrawTriInPixels(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y, Color.red);
+        //
+        // var p = new Vector2Int(100, 50);
+        // var f=RenderingHelper.BaryCentric(v0, v1, v2,p );
+        // Debug.Log($"f:{f}");
+        
+        
         Buf2Screen();
         Profiler.EndSample();
     }

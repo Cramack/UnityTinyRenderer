@@ -10,7 +10,7 @@ public static class RenderingHelper
         var cross=Vector3.Cross(a,b);
         
         //triangle is degenerate
-        if(cross.z<1)
+        if(Mathf.Abs(cross.z)<1)
         {
             return new Vector3(-1,1,1);
         }
