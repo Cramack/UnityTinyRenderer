@@ -8,7 +8,7 @@ public class BarycentricMain : MonoBehaviour
 
     public GameObject m_b;
     public GameObject m_c;
-    public GameObject m_player;
+    public GameObject m_p;
     public int m_count = 10;
     // Start is called before the first frame update
     void OnDrawGizmos()
@@ -17,6 +17,11 @@ public class BarycentricMain : MonoBehaviour
         Gizmos.DrawLine(m_a.transform.position, m_b.transform.position);
         Gizmos.DrawLine(m_b.transform.position, m_c.transform.position);
         Gizmos.DrawLine(m_c.transform.position, m_a.transform.position);
+        
+        Handles.Label(m_a.transform.position,"A");
+        Handles.Label(m_b.transform.position,"B");
+        Handles.Label(m_c.transform.position,"C");
+        Handles.Label(m_p.transform.position,"P");
         
         
         
