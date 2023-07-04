@@ -15,9 +15,11 @@ public class BarycentricMain : MonoBehaviour
     void OnDrawGizmos()
     {
         //draw tri abc
-        Gizmos.DrawLine(m_a.transform.position, m_b.transform.position);
-        Gizmos.DrawLine(m_b.transform.position, m_c.transform.position);
-        Gizmos.DrawLine(m_c.transform.position, m_a.transform.position);
+        Draw.Arrow(m_a.transform.position,m_b.transform.position);
+        
+        // Gizmos.DrawLine(m_a.transform.position, m_b.transform.position);
+        // Gizmos.DrawLine(m_b.transform.position, m_c.transform.position);
+        // Gizmos.DrawLine(m_c.transform.position, m_a.transform.position);
         
         //draw labels
         Handles.Label(m_a.transform.position,"A");
@@ -33,7 +35,7 @@ public class BarycentricMain : MonoBehaviour
         var ac = this.m_c.transform.position - this.m_a.transform.position;
         var perpabc = Vector3.Cross(ba, ac).normalized;
         var perpabcEnd= this.m_a.transform.position + perpabc*10f;
-        Gizmos.DrawLine(this.m_a.transform.position, perpabcEnd);
+        // Draw.Arrow(this.m_a.transform.position,perpabcEnd);
         Gizmos.DrawSphere(perpabcEnd,0.5f);
         var style=new GUIStyle();
         style.normal.textColor = Color.yellow;
