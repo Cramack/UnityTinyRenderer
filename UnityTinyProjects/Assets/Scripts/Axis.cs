@@ -1,26 +1,29 @@
-﻿using Lex;
-using UnityEditor;
+﻿using Unity.Mathematics;
 using UnityEngine;
 
-public class Axis: MonoBehaviour
+public class ArrowTest: MonoBehaviour
 {
     public GameObject m_start;
     public GameObject m_end;
     public float m_headScale=0.1f;
     public float m_angle = 30;
+    public Color m_color = Color.green;
     public void OnDrawGizmos()
     {
-        Draw.Arrow(m_start.transform.position,m_end.transform.position);
-        
-        var dir=m_end.transform.position-m_start.transform.position;
-        var len=dir.magnitude;
-        Handles.Label(this.m_start.transform.position+Vector3.up, len.ToString("0.00"));
-        
-        Gizmos.color=Color.red;
-        Gizmos.DrawCube(m_start.transform.position, new Vector3(0.1f, 0.1f, 0.1f));
-        
-        var cross=Vector3.Cross(dir, Vector3.up);
-        Gizmos.color=Color.blue;
-        Gizmos.DrawRay(this.m_end.transform.position,cross.normalized);
+        Gizmos.color=m_color;
+        DrawArrow(m_start.transform.position,m_end.transform.position,m_headScale,m_angle);
+    }
+
+    void DrawArrow(float3 start, float3 end,float headScale= 0.1f, float angle=30f)
+    {
+        var dir=end-start;
+        var headStart=start+dir*(1-headScale);
+        var cross=math.cross(dir,math.up());
+        var crossNorm=math.normalize(cross); 
+        var crossShouldLen=math.length(end-headStart)*math.tan(angle*Mathf.Deg2Rad);
+        cross=crossNorm*crossShouldLen;
+        Gizmos.DrawLine(end,headStart+cross);
+        Gizmos.DrawLine(end,headStart-cross);
+        Gizmos.DrawLine(start,end);
     }
 }
