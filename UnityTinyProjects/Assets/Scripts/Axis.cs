@@ -1,16 +1,22 @@
 ﻿using Lex;
+using Unity.Mathematics;
 using UnityEngine;
 
-public class ArrowTest: MonoBehaviour
+public class Axis: MonoBehaviour
 {
-    public GameObject m_start;
-    public GameObject m_end;
-    public float m_headScale=0.1f;
-    public float m_angle = 30;
-    public Color m_color = Color.green;
-    public void OnDrawGizmos()
+    void OnDrawGizmos()
     {
-        Gizmos.color=m_color;
-        Draw.DrawArrow(m_start.transform.position,m_end.transform.position,m_headScale,m_angle);
+        //up arrow
+        Gizmos.color=Color.green;
+        Draw.DrawArrow(transform.position,transform.position+Vector3.up,0.1f,30f);
+        
+        //right arrow
+        Gizmos.color=Color.red;
+        Draw.DrawArrow(transform.position,transform.position+Vector3.right,0.1f,30f);
+        
+        //forward arrow
+        Gizmos.color=Color.blue;
+        Draw.DrawArrow(transform.position,transform.position+Vector3.forward,0.1f,30f);
+        
     }
 }

@@ -17,6 +17,9 @@ namespace Lex
             var dir = end - start;
             var headStart = start + dir * (1 - headScale);
             var cross = math.cross(dir, math.up());
+            if (math.all(cross == float3.zero))
+                cross = math.cross(dir, math.right());
+            
             var crossNorm = math.normalize(cross);
             var crossShouldLen = math.length(end - headStart) * math.tan(angle * Mathf.Deg2Rad);
             cross = crossNorm * crossShouldLen;
