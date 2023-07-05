@@ -1,7 +1,5 @@
-using System.IO.Compression;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class BarycentricMain : MonoBehaviour
 {
@@ -15,7 +13,6 @@ public class BarycentricMain : MonoBehaviour
     void OnDrawGizmos()
     {
         //draw tri abc
-        Draw.Arrow(m_a.transform.position,m_b.transform.position);
         
         // Gizmos.DrawLine(m_a.transform.position, m_b.transform.position);
         // Gizmos.DrawLine(m_b.transform.position, m_c.transform.position);
