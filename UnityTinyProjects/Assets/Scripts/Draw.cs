@@ -6,28 +6,23 @@ namespace Lex
     public static class Draw
     {
         /// <summary>
-        /// 当up值和dir接近平行时,arrow会和dir接近平行
+        /// 
         /// </summary>
-        /// <param name="from"></param>
-        /// <param name="to"></param>
-        public static void Arrow(float3 from, float3 to)
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="headScale">Arrow投影到直线上的scale</param>
+        /// <param name="angle">Arrow开关的角度</param>
+        public static void DrawArrow(float3 start, float3 end, float headScale = 0.1f, float angle = 30f)
         {
-            Debug.DrawLine(from, to);
-            var dir = to - from;
-            var up = new float3(0, 1, 0);
-            var normal = math.cross(dir, up);
-            Debug.Log(math.length(normal) / math.length(dir));
-
-            if (math.all(normal == 0)) up = new float3(0, 0, 1);
-            normal = math.cross(dir, up);
-
-            Debug.DrawRay(from, dir + normal);
-
-            var lenScale = 0.2f;
-            //left side reverse when upward
-            Debug.DrawLine(to, to - (dir + normal) * lenScale);
-            //right side reverse when upward
-            Debug.DrawLine(to, to - (dir - normal) * lenScale);
+            var dir = end - start;
+            var headStart = start + dir * (1 - headScale);
+            var cross = math.cross(dir, math.up());
+            var crossNorm = math.normalize(cross);
+            var crossShouldLen = math.length(end - headStart) * math.tan(angle * Mathf.Deg2Rad);
+            cross = crossNorm * crossShouldLen;
+            Gizmos.DrawLine(end, headStart + cross);
+            Gizmos.DrawLine(end, headStart - cross);
+            Gizmos.DrawLine(start, end);
         }
     }
 }
