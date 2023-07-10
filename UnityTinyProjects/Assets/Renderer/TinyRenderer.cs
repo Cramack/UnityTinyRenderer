@@ -13,6 +13,7 @@ public class TinyRenderer : MonoBehaviour
     private Texture2D m_texture2D;
 
     Color[] m_frameBuf;
+    float[] m_zBuf;
     
     
 
@@ -47,8 +48,17 @@ public class TinyRenderer : MonoBehaviour
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
 
-        //frame buf 
-        m_frameBuf = new Color[Screen.width * Screen.height];
+        SetUpBufs();
+    }
+
+    int m_bufWidth;
+    int m_bufHeight;
+    void SetUpBufs()
+    {
+        this.m_bufWidth=Screen.width;
+        this.m_bufHeight=Screen.height;
+        this.m_zBuf=new float[m_bufWidth*m_bufHeight];
+        this.m_frameBuf=new Color[m_bufWidth*m_bufHeight];
     }
 
 
@@ -185,10 +195,10 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawPixel(int x, int y, Color color)
     {
-        if (x < 0 || x >= this.m_texture2D.width || y < 0 || y >= this.m_texture2D.height)
+        if (x < 0 || x >= this.m_bufWidth || y < 0 || y >= this.m_bufHeight)
             return;
 
-        this.m_frameBuf[x + this.m_texture2D.width * y] = color;
+        this.m_frameBuf[x + this.m_bufWidth * y] = color;
     }
 
     /// <summary>
@@ -244,6 +254,8 @@ public class TinyRenderer : MonoBehaviour
 
         Profiler.EndSample();
     }
+    
+    
 
     void DrawLine(Vector3 v0, Vector3 v1, Color color)
     {
@@ -357,6 +369,7 @@ public class TinyRenderer : MonoBehaviour
     void Clear()
     {
         RenderingHelper.FillArrayV2(this.m_frameBuf, m_renderConfig.m_clearColor);
+        RenderingHelper.FillArrayV2(this.m_zBuf,0);
     }
 
     void Render()
