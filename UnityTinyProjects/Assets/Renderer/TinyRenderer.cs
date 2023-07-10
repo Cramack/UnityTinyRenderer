@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Profiling;
 using UnityEngine.UI;
@@ -14,8 +14,6 @@ public class TinyRenderer : MonoBehaviour
 
     Color[] m_frameBuf;
     float[] m_zBuf;
-    
-    
 
 
     public DrawMode m_drawMode = DrawMode.All;
@@ -53,12 +51,13 @@ public class TinyRenderer : MonoBehaviour
 
     int m_bufWidth;
     int m_bufHeight;
+
     void SetUpBufs()
     {
-        this.m_bufWidth=Screen.width;
-        this.m_bufHeight=Screen.height;
-        this.m_zBuf=new float[m_bufWidth*m_bufHeight];
-        this.m_frameBuf=new Color[m_bufWidth*m_bufHeight];
+        this.m_bufWidth = Screen.width;
+        this.m_bufHeight = Screen.height;
+        this.m_zBuf = new float[m_bufWidth * m_bufHeight];
+        this.m_frameBuf = new Color[m_bufWidth * m_bufHeight];
     }
 
 
@@ -189,8 +188,6 @@ public class TinyRenderer : MonoBehaviour
             }
         }
     }
-    
-    
 
 
     void DrawPixel(int x, int y, Color color)
@@ -226,11 +223,11 @@ public class TinyRenderer : MonoBehaviour
     void DrawHeadModel()
     {
         Profiler.BeginSample("DrawHeadModel");
-        
+
         // light direction 
         var lightReflectDir = Vector3.forward;
-        
-        
+
+
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
         var triangles = mesh.triangles;
@@ -240,22 +237,33 @@ public class TinyRenderer : MonoBehaviour
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
-            
+
             //plane normal 
-            var planeNormal = Vector3.Cross(v1 - v0, v2 - v0).normalized;
-            
+            //clockwise winding order
+            var planeNormal = Vector3.Cross(v1 - v0, v2 - v1).normalized;
+
             //light intensity
-            var lightIntensity = Vector3.Dot(planeNormal, lightReflectDir);
-            
-            if(lightIntensity<0)
+            var lightReflectScale = Vector3.Dot(planeNormal, lightReflectDir);
+
+            if (lightReflectScale < 0)
                 continue;
-            DrawTri(v0, v1, v2, m_light.color*lightIntensity);
+            DrawTri(new Triangle(
+                new Vertex
+            {
+                m_objectPos = v0
+                
+            },new Vertex()
+            {
+               m_objectPos = v1
+            },new Vertex()
+            {
+               m_objectPos = v2
+            }), m_light.color * lightReflectScale*m_light.intensity);
         }
 
         Profiler.EndSample();
     }
-    
-    
+
 
     void DrawLine(Vector3 v0, Vector3 v1, Color color)
     {
@@ -267,10 +275,61 @@ public class TinyRenderer : MonoBehaviour
         DrawLineInPixels(x0, y0, x1, y1, color);
     }
 
+    void DrawTri(Triangle t, Color color)
+    {
+        CalculateScreenFromObject4Tri(ref t);
+        
+        int x0 = (int)t.m_v0.m_screenPos.x;
+        int y0 = (int)t.m_v0.m_screenPos.y;
+        int x1 = (int)t.m_v1.m_screenPos.x;
+        int y1 = (int)t.m_v1.m_screenPos.y;
+        int x2 = (int)t.m_v2.m_screenPos.x;
+        int y2 = (int)t.m_v2.m_screenPos.y;
+        var bbox = BBoxInt2D.GetBBox(Vector2Int.zero,
+            new Vector2Int(this.m_texture2D.width - 1, this.m_texture2D.height - 1),
+            new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
+
+        var point = Vector2Int.zero;
+
+        for (point.x = bbox.m_min.x; point.x <= bbox.m_max.x; point.x++)
+        {
+            for (point.y = bbox.m_min.y; point.y <= bbox.m_max.y; point.y++)
+            {
+                var barycentric = RenderingHelper.BaryCentric(new Vector2Int(x0, y0), new Vector2Int(x1, y1),
+                    new Vector2Int(x2, y2), point);
+                if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0)
+                    continue;
+                
+                var pz= barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
+                         barycentric.z * t.m_v2.m_screenPos.z;
+                int zBufIndex = point.y * this.m_bufWidth + point.x;
+                if (pz > this.m_zBuf[zBufIndex])
+                {
+                    this.m_zBuf[zBufIndex] = pz;
+                    DrawPixel(point.x, point.y, color);
+                }
+            }
+        }
+    }
+
+    void CalculateScreenFromObject4Tri(ref Triangle t)
+    {
+        CalculateScreenFromObject4Vertex( ref t.m_v0);
+        CalculateScreenFromObject4Vertex(ref t.m_v1);
+        CalculateScreenFromObject4Vertex(ref t.m_v2);
+    }
+
+    void CalculateScreenFromObject4Vertex(ref Vertex v)
+    {
+        var x = (int)((v.m_objectPos.x) * Screen.width * 0.5) + Screen.width / 2;
+        var y = (int)((v.m_objectPos.y) * Screen.height * 0.5) + Screen.height / 2;
+        var z = v.m_objectPos.z;
+        v.m_screenPos = new float3(x, y,z);
+    }
+
     void DrawTri(Vector3 v0, Vector3 v1, Vector3 v2, Color color)
     {
         var x0 = (int)((v0.x) * Screen.width * 0.5) + Screen.width / 2;
-        ;
         var y0 = (int)((v0.y) * Screen.height * 0.5) + Screen.height / 2;
         var x1 = (int)((v1.x) * Screen.width * 0.5) + Screen.width / 2;
         var y1 = (int)((v1.y) * Screen.height * 0.5) + Screen.height / 2;
@@ -293,29 +352,30 @@ public class TinyRenderer : MonoBehaviour
         var v2 = new Vector2Int(x2, y2);
         DrawTriInPixels(v0, v1, v2, color);
     }
-    
-    
+
 
     void RenderTriInFilled(int x0, int y0, int x1, int y1, int x2, int y2, Color color)
     {
         //get bbox 
-        var bbox=BBoxInt2D.GetBBox(Vector2Int.zero, new Vector2Int(this.m_texture2D.width-1, this.m_texture2D.height-1), 
+        var bbox = BBoxInt2D.GetBBox(Vector2Int.zero,
+            new Vector2Int(this.m_texture2D.width - 1, this.m_texture2D.height - 1),
             new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
 
         var point = Vector2Int.zero;
 
-        for (point.x= bbox.m_min.x; point.x<=bbox.m_max.x; point.x++)
+        for (point.x = bbox.m_min.x; point.x <= bbox.m_max.x; point.x++)
         {
-            for (point.y = bbox.m_min.y; point.y<=bbox.m_max.y; point.y++)
+            for (point.y = bbox.m_min.y; point.y <= bbox.m_max.y; point.y++)
             {
-                var barycentric =RenderingHelper.BaryCentric( new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2),point);
-                if(barycentric.x<0||barycentric.y<0||barycentric.z<0)
+                var barycentric = RenderingHelper.BaryCentric(new Vector2Int(x0, y0), new Vector2Int(x1, y1),
+                    new Vector2Int(x2, y2), point);
+                if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0)
                     continue;
-                DrawPixel(point.x,point.y,color);
-            } 
+                DrawPixel(point.x, point.y, color);
+            }
         }
-        
-        
+
+
         // List<(int X, int Y)> points = new List<(int X, int Y)>()
         // {
         //     (x0, y0),
@@ -369,7 +429,8 @@ public class TinyRenderer : MonoBehaviour
     void Clear()
     {
         RenderingHelper.FillArrayV2(this.m_frameBuf, m_renderConfig.m_clearColor);
-        RenderingHelper.FillArrayV2(this.m_zBuf,0);
+        //z could be zero; we haven't normalize it yet
+        RenderingHelper.FillArrayV2(this.m_zBuf, float.MinValue);
     }
 
     void Render()
@@ -380,7 +441,7 @@ public class TinyRenderer : MonoBehaviour
         Clear();
         Profiler.EndSample();
         DrawHeadModel();
-        
+
         // var v0=new Vector2Int(0,0);
         // var v1=new Vector2Int(100,100);
         // var v2=new Vector2Int(200,50);
@@ -390,8 +451,8 @@ public class TinyRenderer : MonoBehaviour
         // var p = new Vector2Int(100, 50);
         // var f=RenderingHelper.BaryCentric(v0, v1, v2,p );
         // Debug.Log($"f:{f}");
-        
-        
+
+
         Buf2Screen();
         Profiler.EndSample();
     }

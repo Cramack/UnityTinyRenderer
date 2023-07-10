@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: RendererConfig
   m_EditorClassIdentifier: 
   m_useUnityNativeRendering: 0
+  m_clearColor: {r: 0, g: 0, b: 0, a: 1}
