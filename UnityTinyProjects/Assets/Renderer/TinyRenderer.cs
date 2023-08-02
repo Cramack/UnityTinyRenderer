@@ -222,11 +222,8 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawHeadModel()
     {
-        Profiler.BeginSample("DrawHeadModel");
-
         // light direction 
         var lightReflectDir = Vector3.forward;
-
 
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
@@ -239,7 +236,7 @@ public class TinyRenderer : MonoBehaviour
             var v2 = vertices[triangles[i + 2]];
 
             //plane normal 
-            //clockwise winding order
+            //crossproduct use clockwise winding order
             var planeNormal = Vector3.Cross(v1 - v0, v2 - v1).normalized;
 
             //light intensity
@@ -248,20 +245,37 @@ public class TinyRenderer : MonoBehaviour
             if (lightReflectScale < 0)
                 continue;
             DrawTri(new Triangle(
-                new Vertex
-            {
-                m_objectPos = v0
-                
-            },new Vertex()
-            {
-               m_objectPos = v1
-            },new Vertex()
-            {
-               m_objectPos = v2
-            }), m_light.color * lightReflectScale*m_light.intensity);
+                new Vertex { m_objectPos = v0 }, 
+                new Vertex() { m_objectPos = v1 }, 
+                new Vertex() { m_objectPos = v2
+            }), m_light.color * lightReflectScale * m_light.intensity);
         }
+    }
 
-        Profiler.EndSample();
+    public int m_startIndex = 0;
+    
+    void OnDrawGizmos()
+    {
+        var meshFilter = m_headModel.GetComponent<MeshFilter>();
+        var mesh = meshFilter.sharedMesh;
+        var triangles = mesh.triangles;
+        var vertices = mesh.vertices;
+        for (int i = 3*m_startIndex; i < triangles.Length; i += 3)
+        {
+            var v0 = vertices[triangles[i]];
+            var v1 = vertices[triangles[i + 1]];
+            var v2 = vertices[triangles[i + 2]];
+
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(v0, 0.01f);
+            Gizmos.color = Color.red;
+            Gizmos.DrawSphere(v1, 0.01f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawSphere(v2, 0.01f);
+            
+            break;
+            
+        }
     }
 
 
@@ -278,7 +292,7 @@ public class TinyRenderer : MonoBehaviour
     void DrawTri(Triangle t, Color color)
     {
         CalculateScreenFromObject4Tri(ref t);
-        
+
         int x0 = (int)t.m_v0.m_screenPos.x;
         int y0 = (int)t.m_v0.m_screenPos.y;
         int x1 = (int)t.m_v1.m_screenPos.x;
@@ -299,8 +313,8 @@ public class TinyRenderer : MonoBehaviour
                     new Vector2Int(x2, y2), point);
                 if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0)
                     continue;
-                
-                var pz= barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
+
+                var pz = barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
                          barycentric.z * t.m_v2.m_screenPos.z;
                 int zBufIndex = point.y * this.m_bufWidth + point.x;
                 if (pz > this.m_zBuf[zBufIndex])
@@ -314,7 +328,7 @@ public class TinyRenderer : MonoBehaviour
 
     void CalculateScreenFromObject4Tri(ref Triangle t)
     {
-        CalculateScreenFromObject4Vertex( ref t.m_v0);
+        CalculateScreenFromObject4Vertex(ref t.m_v0);
         CalculateScreenFromObject4Vertex(ref t.m_v1);
         CalculateScreenFromObject4Vertex(ref t.m_v2);
     }
@@ -324,7 +338,7 @@ public class TinyRenderer : MonoBehaviour
         var x = (int)((v.m_objectPos.x) * Screen.width * 0.5) + Screen.width / 2;
         var y = (int)((v.m_objectPos.y) * Screen.height * 0.5) + Screen.height / 2;
         var z = v.m_objectPos.z;
-        v.m_screenPos = new float3(x, y,z);
+        v.m_screenPos = new float3(x, y, z);
     }
 
     void DrawTri(Vector3 v0, Vector3 v1, Vector3 v2, Color color)
@@ -433,28 +447,14 @@ public class TinyRenderer : MonoBehaviour
         RenderingHelper.FillArrayV2(this.m_zBuf, float.MinValue);
     }
 
+    /// <summary>
+    /// 渲染的主函数
+    /// </summary>
     void Render()
     {
-        Profiler.BeginSample("Render");
-
-        Profiler.BeginSample("Clear");
         Clear();
-        Profiler.EndSample();
         DrawHeadModel();
-
-        // var v0=new Vector2Int(0,0);
-        // var v1=new Vector2Int(100,100);
-        // var v2=new Vector2Int(200,50);
-        //
-        // DrawTriInPixels(v0.x, v0.y, v1.x, v1.y, v2.x, v2.y, Color.red);
-        //
-        // var p = new Vector2Int(100, 50);
-        // var f=RenderingHelper.BaryCentric(v0, v1, v2,p );
-        // Debug.Log($"f:{f}");
-
-
         Buf2Screen();
-        Profiler.EndSample();
     }
 
     void Buf2Screen()
