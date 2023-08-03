@@ -3,20 +3,25 @@ using UnityEngine;
 
 public static class RenderingHelper
 {
-    public static Vector3 BaryCentric(Vector2Int v0, Vector2Int v1, Vector2Int v2, Vector2Int p)
+    public static Vector3 BaryCentric(Vector2Int a, Vector2Int b, Vector2Int c, Vector2Int p)
     {
-        var a = new Vector3(v2.x - v0.x, v1.x - v0.x, v0.x - p.x);
-        var b = new Vector3(v2.y - v0.y, v1.y - v0.y, v0.y - p.y);
-        //calculate cross product
-        var cross = Vector3.Cross(a, b);
+        var a1 = b.x - a.x;
+        var b1 = c.x - a.x;
+        var c1 = p.x - a.x;
+        var a2 = b.y - a.y;
+        var b2 = c.y - a.y;
+        var c2 = p.y - a.y;
 
-        //triangle is degenerate
-        if (Mathf.Abs(cross.z) < 1)
+        var d = a1 * b2 - a2 * b1;
+        if (d == 0)
         {
-            return new Vector3(-1, 1, 1);
+            return new Vector3(-1, -1, -1);
         }
 
-        return new Vector3(1 - (cross.x + cross.y) / cross.z, cross.x / cross.z, cross.y / cross.z);
+        var u = (float)(b2 * c1 - b1 * c2) / d;
+        var v = (float)(a1 * c2 - a2 * c1) / d;
+        var w = 1 - u - v;
+        return new Vector3(u, v, w);
     }
 
     public static void FillArrayV1<T>(T[] arr, T value)
