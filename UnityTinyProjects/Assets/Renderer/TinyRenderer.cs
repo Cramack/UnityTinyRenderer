@@ -227,7 +227,7 @@ public class TinyRenderer : MonoBehaviour
     void DrawHeadModel()
     {
         // light direction 
-        var lightReflectDir = Vector3.forward;
+        var lightReflectDir = -m_light.transform.forward;
 
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
