@@ -5,6 +5,15 @@ struct BBoxInt2D
     public Vector2Int m_min;
     public Vector2Int m_max;
 
+    /// <summary>
+    /// 根据三角形的三个顶点，计算出三角形的包围盒. 
+    /// </summary>
+    /// <param name="min"></param>
+    /// <param name="max"></param>
+    /// <param name="p0"></param>
+    /// <param name="p1"></param>
+    /// <param name="p2"></param>
+    /// <returns></returns>
     public static BBoxInt2D GetBBox(Vector2Int min,Vector2Int max,Vector2Int p0,Vector2Int p1,Vector2Int p2)
     {
         var ret=new BBoxInt2D();

@@ -1,3 +1,6 @@
+/// <summary>
+/// 渲染使用的三角形数据结构
+/// </summary>
 public struct Triangle
 {
     public Vertex m_v0;

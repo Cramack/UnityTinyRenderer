@@ -1,7 +1,6 @@
 using System;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Profiling;
 using UnityEngine.UI;
 
 public class TinyRenderer : MonoBehaviour
@@ -235,11 +234,12 @@ public class TinyRenderer : MonoBehaviour
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
 
-            //plane normal 
-            //crossproduct use clockwise winding order
+            //我们这里假设模型坐标就是世界坐标
+            
+            //模型的顶点顺序是顺时针的,所以这里的法线是指向外的
             var planeNormal = Vector3.Cross(v1 - v0, v2 - v1).normalized;
 
-            //light intensity
+            //通过面的法线和光线的反射方向计算光的强度
             var lightReflectScale = Vector3.Dot(planeNormal, lightReflectDir);
 
             if (lightReflectScale < 0)
@@ -291,6 +291,7 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawTri(Triangle t, Color color)
     {
+        //计算屏幕坐标
         CalculateScreenFromObject4Tri(ref t);
 
         int x0 = (int)t.m_v0.m_screenPos.x;
@@ -299,16 +300,20 @@ public class TinyRenderer : MonoBehaviour
         int y1 = (int)t.m_v1.m_screenPos.y;
         int x2 = (int)t.m_v2.m_screenPos.x;
         int y2 = (int)t.m_v2.m_screenPos.y;
+        
+        //计算包围盒
         var bbox = BBoxInt2D.GetBBox(Vector2Int.zero,
             new Vector2Int(this.m_texture2D.width - 1, this.m_texture2D.height - 1),
             new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
 
         var point = Vector2Int.zero;
-
+        
+        //遍历包围盒内的点
         for (point.x = bbox.m_min.x; point.x <= bbox.m_max.x; point.x++)
         {
             for (point.y = bbox.m_min.y; point.y <= bbox.m_max.y; point.y++)
             {
+                //计算重心坐标
                 var barycentric = RenderingHelper.BaryCentric(new Vector2Int(x0, y0), new Vector2Int(x1, y1),
                     new Vector2Int(x2, y2), point);
                 if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0)
@@ -316,7 +321,9 @@ public class TinyRenderer : MonoBehaviour
 
                 var pz = barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
                          barycentric.z * t.m_v2.m_screenPos.z;
+                
                 int zBufIndex = point.y * this.m_bufWidth + point.x;
+                //深度测试
                 if (pz > this.m_zBuf[zBufIndex])
                 {
                     this.m_zBuf[zBufIndex] = pz;
@@ -442,9 +449,9 @@ public class TinyRenderer : MonoBehaviour
 
     void Clear()
     {
-        RenderingHelper.FillArrayV2(this.m_frameBuf, m_renderConfig.m_clearColor);
+        RenderingHelper.FillArray(this.m_frameBuf, m_renderConfig.m_clearColor);
         //z could be zero; we haven't normalize it yet
-        RenderingHelper.FillArrayV2(this.m_zBuf, float.MinValue);
+        RenderingHelper.FillArray(this.m_zBuf, float.MinValue);
     }
 
     /// <summary>

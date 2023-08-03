@@ -2,6 +2,9 @@ using System;
 using System.Diagnostics;
 using UnityEngine.Pool;
 
+/// <summary>
+/// 一个简单的计时器，用于测试性能
+/// </summary>
 class SimpleStopWatchTimer : IDisposable
 {
     public SimpleStopWatchTimer()
