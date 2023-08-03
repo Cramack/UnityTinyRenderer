@@ -28,6 +28,7 @@ public class TinyRenderer : MonoBehaviour
     [SerializeField]
     GameObject m_headModel;
 
+    
 
     void Start()
     {
@@ -45,6 +46,7 @@ public class TinyRenderer : MonoBehaviour
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
 
+        
         SetUpBufs();
     }
 
@@ -219,6 +221,9 @@ public class TinyRenderer : MonoBehaviour
     [SerializeField]
     Light m_light;
 
+
+    [SerializeField]
+    Texture2D m_headTexture;
     void DrawHeadModel()
     {
         // light direction 
@@ -228,11 +233,18 @@ public class TinyRenderer : MonoBehaviour
         var mesh = meshFilter.sharedMesh;
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
+        var uvs = mesh.uv;
         for (int i = 0; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
+           
+            
+            var uv0 = uvs[triangles[i]];
+            var uv1 = uvs[triangles[i + 1]];
+            var uv2 = uvs[triangles[i + 2]];
+
 
             //我们这里假设模型坐标就是世界坐标
             
@@ -245,10 +257,10 @@ public class TinyRenderer : MonoBehaviour
             if (lightReflectScale < 0)
                 continue;
             DrawTri(new Triangle(
-                new Vertex { m_objectPos = v0 }, 
-                new Vertex() { m_objectPos = v1 }, 
-                new Vertex() { m_objectPos = v2
-            }), m_light.color * lightReflectScale * m_light.intensity);
+                new Vertex { m_objectPos = v0 , m_uv = uv0}, 
+                new Vertex() { m_objectPos = v1,m_uv = uv1}, 
+                new Vertex() { m_objectPos = v2,m_uv = uv2 }), 
+                m_light.color * lightReflectScale * m_light.intensity);
         }
     }
 
@@ -319,15 +331,24 @@ public class TinyRenderer : MonoBehaviour
                 if (barycentric.x < 0 || barycentric.y < 0 || barycentric.z < 0)
                     continue;
 
+                //z坐标插值
                 var pz = barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
                          barycentric.z * t.m_v2.m_screenPos.z;
+                
+                var textureUV= barycentric.x * t.m_v0.m_uv + barycentric.y * t.m_v1.m_uv +
+                               barycentric.z * t.m_v2.m_uv;
                 
                 int zBufIndex = point.y * this.m_bufWidth + point.x;
                 //深度测试
                 if (pz > this.m_zBuf[zBufIndex])
                 {
                     this.m_zBuf[zBufIndex] = pz;
-                    DrawPixel(point.x, point.y, color);
+                    
+                    //texture 
+                    var out_color = this.m_headTexture.GetPixel((int)(textureUV.x * this.m_headTexture.width),
+                        (int)(textureUV.y * this.m_headTexture.height))*color;
+                    
+                    DrawPixel(point.x, point.y, out_color);
                 }
             }
         }

@@ -298,6 +298,8 @@ MonoBehaviour:
   m_headModel: {fileID: 1916537406}
   m_useMyLineDrawing: 1
   m_light: {fileID: 2044785333}
+  m_headTexture: {fileID: 2800000, guid: 3f2bb7b029e910e4c87f9f8e5866a9cb, type: 3}
+  m_startIndex: 0
 --- !u!1 &1536601082
 GameObject:
   m_ObjectHideFlags: 0
