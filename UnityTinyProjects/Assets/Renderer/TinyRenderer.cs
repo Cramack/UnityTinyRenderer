@@ -275,6 +275,8 @@ public class TinyRenderer : MonoBehaviour
             0,0,0,1 
         );
 
+        //这里是变换矩阵,是由Model View Projection ViewPort构成的
+        var transformMatrix =math.mul(viewPortMatrix,math.mul(perspectiveMatrix,math.mul(viewMatrix, modelMatrix))) ;
         for (int i = 0; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
@@ -310,11 +312,10 @@ public class TinyRenderer : MonoBehaviour
             for (int j = 0; j < 3; j++)
             {
                 var v = t[j];
-                v.m_pos = math.mul(modelMatrix, v.m_pos);
-                v.m_pos= math.mul(perspectiveMatrix, v.m_pos);
-                v.m_pos = math.mul(viewPortMatrix, v.m_pos);
-                v.m_pos /= v.m_pos.w;
+                v.m_pos = math.mul(transformMatrix, v.m_pos);
                 
+                //透视除法可以放到最后是因为w在透视生成后始终不变
+                v.m_pos /= v.m_pos.w;
             }
 
             //计算屏幕坐标
