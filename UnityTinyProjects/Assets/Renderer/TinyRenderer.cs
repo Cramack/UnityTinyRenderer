@@ -28,7 +28,6 @@ public class TinyRenderer : MonoBehaviour
     [SerializeField]
     GameObject m_headModel;
 
-    
 
     void Start()
     {
@@ -46,7 +45,7 @@ public class TinyRenderer : MonoBehaviour
         m_rawImage.texture = m_texture2D;
         m_rawImage.SetNativeSize();
 
-        
+
         SetUpBufs();
     }
 
@@ -224,6 +223,13 @@ public class TinyRenderer : MonoBehaviour
 
     [SerializeField]
     Texture2D m_headTexture;
+
+    /// <summary>
+    /// camera 放在c轴的位置
+    /// </summary>
+    [SerializeField]
+    float m_c = 0;
+
     void DrawHeadModel()
     {
         // light direction 
@@ -234,20 +240,44 @@ public class TinyRenderer : MonoBehaviour
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
         var uvs = mesh.uv;
+        
+        //构建移动及缩放
+        var mMatrix = new float4x4(
+                100, 0, 0, 0,
+                0, 100, 0, 0,
+                0, 0, 100, 300,
+                0, 0, 0, 1)
+            ;
+        
+        //构建投影矩阵
+        var pMatrix = float4x4.identity;
+        if (m_enablePerspective)
+        {
+            pMatrix.c2.w = -1 / m_c;
+        }
+
+
+        //构建screen矩阵
+        var sMatrix = float4x4.identity;
+        sMatrix.c0.x = 1;
+        sMatrix.c1.y =1 ;
+        sMatrix.c3.x = 300;
+        sMatrix.c3.y = 300;
+
         for (int i = 0; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
-           
-            
+
+
             var uv0 = uvs[triangles[i]];
             var uv1 = uvs[triangles[i + 1]];
             var uv2 = uvs[triangles[i + 2]];
 
 
             //我们这里假设模型坐标就是世界坐标
-            
+
             //模型的顶点顺序是顺时针的,所以这里的法线是指向外的
             var planeNormal = Vector3.Cross(v1 - v0, v2 - v1).normalized;
 
@@ -256,23 +286,58 @@ public class TinyRenderer : MonoBehaviour
 
             if (lightReflectScale < 0)
                 continue;
-            DrawTri(new Triangle(
-                new Vertex { m_objectPos = v0 , m_uv = uv0}, 
-                new Vertex() { m_objectPos = v1,m_uv = uv1}, 
-                new Vertex() { m_objectPos = v2,m_uv = uv2 }), 
-                m_light.color * lightReflectScale * m_light.intensity);
+
+
+            float4 fv0 = new float4(v0, 1);
+            float4 fv1=new float4(v1, 1);
+            float4 fv2=new float4(v2, 1);
+            
+            
+            
+            
+            
+            fv0= math.mul(mMatrix, new float4(v0, 1));
+            fv1 = math.mul(mMatrix, new float4(v1, 1));
+            fv2 = math.mul(mMatrix, new float4(v2, 1));
+            
+            
+            //projection
+            fv0 = math.mul(pMatrix,fv0);
+            fv1 = math.mul(pMatrix, fv1);
+            fv2 = math.mul(pMatrix, fv2);
+
+            fv2 /= fv2.w;
+            fv1 /= fv1.w;
+            fv0 /= fv0.w;
+
+            //screen
+            fv0 = math.mul(sMatrix, fv0);
+            fv1 = math.mul(sMatrix, fv1);
+            fv2 = math.mul(sMatrix, fv2);
+
+            var t = new Triangle(
+                new Vertex { m_pos = fv0.xyz, m_uv = uv0 },
+                new Vertex() { m_pos = fv1.xyz, m_uv = uv1 },
+                new Vertex() { m_pos = fv2.xyz, m_uv = uv2 });
+
+
+            //计算屏幕坐标
+            // CalculateScreenFromObject4Tri(ref t);
+            DrawTri(t, m_light.color * lightReflectScale * m_light.intensity);
         }
     }
 
+    public bool m_enablePerspective = true;
+
     public int m_startIndex = 0;
-    
+
     void OnDrawGizmos()
     {
         var meshFilter = m_headModel.GetComponent<MeshFilter>();
         var mesh = meshFilter.sharedMesh;
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
-        for (int i = 3*m_startIndex; i < triangles.Length; i += 3)
+        for (int i = 3 * m_startIndex; i < triangles.Length; i += 3)
         {
             var v0 = vertices[triangles[i]];
             var v1 = vertices[triangles[i + 1]];
@@ -284,9 +349,8 @@ public class TinyRenderer : MonoBehaviour
             Gizmos.DrawSphere(v1, 0.01f);
             Gizmos.color = Color.blue;
             Gizmos.DrawSphere(v2, 0.01f);
-            
+
             break;
-            
         }
     }
 
@@ -303,23 +367,20 @@ public class TinyRenderer : MonoBehaviour
 
     void DrawTri(Triangle t, Color color)
     {
-        //计算屏幕坐标
-        CalculateScreenFromObject4Tri(ref t);
+        int x0 = (int)t.m_v0.m_pos.x;
+        int y0 = (int)t.m_v0.m_pos.y;
+        int x1 = (int)t.m_v1.m_pos.x;
+        int y1 = (int)t.m_v1.m_pos.y;
+        int x2 = (int)t.m_v2.m_pos.x;
+        int y2 = (int)t.m_v2.m_pos.y;
 
-        int x0 = (int)t.m_v0.m_screenPos.x;
-        int y0 = (int)t.m_v0.m_screenPos.y;
-        int x1 = (int)t.m_v1.m_screenPos.x;
-        int y1 = (int)t.m_v1.m_screenPos.y;
-        int x2 = (int)t.m_v2.m_screenPos.x;
-        int y2 = (int)t.m_v2.m_screenPos.y;
-        
         //计算包围盒
         var bbox = BBoxInt2D.GetBBox(Vector2Int.zero,
             new Vector2Int(this.m_texture2D.width - 1, this.m_texture2D.height - 1),
             new Vector2Int(x0, y0), new Vector2Int(x1, y1), new Vector2Int(x2, y2));
 
         var point = Vector2Int.zero;
-        
+
         //遍历包围盒内的点
         for (point.x = bbox.m_min.x; point.x <= bbox.m_max.x; point.x++)
         {
@@ -332,42 +393,42 @@ public class TinyRenderer : MonoBehaviour
                     continue;
 
                 //z坐标插值
-                var pz = barycentric.x * t.m_v0.m_screenPos.z + barycentric.y * t.m_v1.m_screenPos.z +
-                         barycentric.z * t.m_v2.m_screenPos.z;
-                
-                var textureUV= barycentric.x * t.m_v0.m_uv + barycentric.y * t.m_v1.m_uv +
-                               barycentric.z * t.m_v2.m_uv;
-                
+                var pz = barycentric.x * t.m_v0.m_pos.z + barycentric.y * t.m_v1.m_pos.z +
+                         barycentric.z * t.m_v2.m_pos.z;
+
+                var textureUV = barycentric.x * t.m_v0.m_uv + barycentric.y * t.m_v1.m_uv +
+                                barycentric.z * t.m_v2.m_uv;
+
                 int zBufIndex = point.y * this.m_bufWidth + point.x;
                 //深度测试
                 if (pz > this.m_zBuf[zBufIndex])
                 {
                     this.m_zBuf[zBufIndex] = pz;
-                    
+
                     //texture 
                     var out_color = this.m_headTexture.GetPixel((int)(textureUV.x * this.m_headTexture.width),
-                        (int)(textureUV.y * this.m_headTexture.height))*color;
-                    
+                        (int)(textureUV.y * this.m_headTexture.height)) * color;
+
                     DrawPixel(point.x, point.y, out_color);
                 }
             }
         }
     }
 
-    void CalculateScreenFromObject4Tri(ref Triangle t)
-    {
-        CalculateScreenFromObject4Vertex(ref t.m_v0);
-        CalculateScreenFromObject4Vertex(ref t.m_v1);
-        CalculateScreenFromObject4Vertex(ref t.m_v2);
-    }
+    // void CalculateScreenFromObject4Tri(ref Triangle t)
+    // {
+    //     CalculateScreenFromObject4Vertex(ref t.m_v0);
+    //     CalculateScreenFromObject4Vertex(ref t.m_v1);
+    //     CalculateScreenFromObject4Vertex(ref t.m_v2);
+    // }
 
-    void CalculateScreenFromObject4Vertex(ref Vertex v)
-    {
-        var x = (int)((v.m_objectPos.x) * Screen.width * 0.5) + Screen.width / 2;
-        var y = (int)((v.m_objectPos.y) * Screen.height * 0.5) + Screen.height / 2;
-        var z = v.m_objectPos.z;
-        v.m_screenPos = new float3(x, y, z);
-    }
+    // void CalculateScreenFromObject4Vertex(ref Vertex v)
+    // {
+    //     var x = (int)((v.m_objectPos.x) * Screen.width * 0.5) + Screen.width / 2;
+    //     var y = (int)((v.m_objectPos.y) * Screen.height * 0.5) + Screen.height / 2;
+    //     var z = v.m_objectPos.z;
+    //     v.m_screenPos = new float3(x, y, z);
+    // }
 
     void DrawTri(Vector3 v0, Vector3 v1, Vector3 v2, Color color)
     {
