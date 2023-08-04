@@ -281,11 +281,9 @@ public class TinyRenderer : MonoBehaviour
             var v1 = vertices[triangles[i + 1]];
             var v2 = vertices[triangles[i + 2]];
 
-
             var uv0 = uvs[triangles[i]];
             var uv1 = uvs[triangles[i + 1]];
             var uv2 = uvs[triangles[i + 2]];
-
 
             //我们这里假设模型坐标就是世界坐标
 
@@ -307,32 +305,17 @@ public class TinyRenderer : MonoBehaviour
                 new Vertex { m_pos = fv0, m_uv = uv0 },
                 new Vertex() { m_pos = fv1, m_uv = uv1 },
                 new Vertex() { m_pos = fv2, m_uv = uv2 });
-            
-            
-            fv0= math.mul(modelMatrix, fv0);
-            fv1 = math.mul(modelMatrix, fv1);
-            fv2 = math.mul(modelMatrix, fv2);
-            
-            
-            //projection
-            fv0 = math.mul(perspectiveMatrix,fv0);
-            fv1 = math.mul(perspectiveMatrix, fv1);
-            fv2 = math.mul(perspectiveMatrix, fv2);
 
 
-            //screen
-            fv0 = math.mul(viewPortMatrix, fv0);
-            fv1 = math.mul(viewPortMatrix, fv1);
-            fv2 = math.mul(viewPortMatrix, fv2);
-            
-            
-            fv2 /= fv2.w;
-            fv1 /= fv1.w;
-            fv0 /= fv0.w;
-
-            t[0].m_pos= fv0;
-            t[1].m_pos = fv1; 
-            t[2].m_pos = fv2;
+            for (int j = 0; j < 3; j++)
+            {
+                var v = t[j];
+                v.m_pos = math.mul(modelMatrix, v.m_pos);
+                v.m_pos= math.mul(perspectiveMatrix, v.m_pos);
+                v.m_pos = math.mul(viewPortMatrix, v.m_pos);
+                v.m_pos /= v.m_pos.w;
+                
+            }
 
             //计算屏幕坐标
             // CalculateScreenFromObject4Tri(ref t);
