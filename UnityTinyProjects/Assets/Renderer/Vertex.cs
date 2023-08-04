@@ -3,7 +3,7 @@ using Unity.Mathematics;
 /// <summary>
 /// 顶点的数据结构
 /// </summary>
-public struct Vertex
+public class Vertex
 {
     
     public float4 m_pos;
