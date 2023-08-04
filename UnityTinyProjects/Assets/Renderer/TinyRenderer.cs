@@ -243,9 +243,9 @@ public class TinyRenderer : MonoBehaviour
         
         //构建移动及缩放
         var mMatrix = new float4x4(
-                100, 0, 0, 0,
+                100, 0, 0, 200,
                 0, 100, 0, 0,
-                0, 0, 100, 300,
+                0, 0, 100, 0,
                 0, 0, 0, 1)
             ;
         
@@ -292,8 +292,10 @@ public class TinyRenderer : MonoBehaviour
             float4 fv1=new float4(v1, 1);
             float4 fv2=new float4(v2, 1);
             
-            
-            
+            var t = new Triangle(
+                new Vertex { m_pos = fv0, m_uv = uv0 },
+                new Vertex() { m_pos = fv1, m_uv = uv1 },
+                new Vertex() { m_pos = fv2, m_uv = uv2 });
             
             
             fv0= math.mul(mMatrix, new float4(v0, 1));
@@ -315,11 +317,10 @@ public class TinyRenderer : MonoBehaviour
             fv1 = math.mul(sMatrix, fv1);
             fv2 = math.mul(sMatrix, fv2);
 
-            var t = new Triangle(
-                new Vertex { m_pos = fv0.xyz, m_uv = uv0 },
-                new Vertex() { m_pos = fv1.xyz, m_uv = uv1 },
-                new Vertex() { m_pos = fv2.xyz, m_uv = uv2 });
 
+            t.m_v0.m_pos= fv0;
+            t.m_v1.m_pos = fv1; 
+            t.m_v2.m_pos = fv2;
 
             //计算屏幕坐标
             // CalculateScreenFromObject4Tri(ref t);

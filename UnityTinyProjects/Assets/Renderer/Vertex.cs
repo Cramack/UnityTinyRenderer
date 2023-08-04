@@ -6,7 +6,7 @@ using Unity.Mathematics;
 public struct Vertex
 {
     
-    public float3 m_pos;
+    public float4 m_pos;
     
     /// <summary>
     /// uv坐标
