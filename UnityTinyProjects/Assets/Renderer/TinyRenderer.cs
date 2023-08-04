@@ -245,30 +245,35 @@ public class TinyRenderer : MonoBehaviour
         //初始化矩阵
         var modelMatrix= float4x4.identity;
         var viewMatrix = float4x4.identity;
+        var perspectiveMatrix= float4x4.identity;
+        var viewPortMatrix= float4x4.identity;
         
         
         //构建移动及缩放
         modelMatrix = new float4x4(
-                100, 0, 0, 200,
-                0, 100, 0, 0,
-                0, 0, 100, 0,
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
                 0, 0, 0, 1)
             ;
         
         //构建投影矩阵
-        var pMatrix = float4x4.identity;
         if (m_enablePerspective)
         {
-            pMatrix.c2.w = -1 / m_c;
+            perspectiveMatrix=new float4x4(
+                1,0,0,0,
+                0,1,0,0,
+                0,0,0,1,
+                0,0,-1/m_c,1);
         }
 
-
         //构建screen矩阵
-        var sMatrix = float4x4.identity;
-        sMatrix.c0.x = 1;
-        sMatrix.c1.y =1 ;
-        sMatrix.c3.x = 300;
-        sMatrix.c3.y = 300;
+        viewPortMatrix = new float4x4(
+            100,0,0,300,
+            0,100,0,300,
+            0,0,1,0,
+            0,0,0,1 
+        );
 
         for (int i = 0; i < triangles.Length; i += 3)
         {
@@ -304,24 +309,26 @@ public class TinyRenderer : MonoBehaviour
                 new Vertex() { m_pos = fv2, m_uv = uv2 });
             
             
-            fv0= math.mul(modelMatrix, new float4(v0, 1));
-            fv1 = math.mul(modelMatrix, new float4(v1, 1));
-            fv2 = math.mul(modelMatrix, new float4(v2, 1));
+            fv0= math.mul(modelMatrix, fv0);
+            fv1 = math.mul(modelMatrix, fv1);
+            fv2 = math.mul(modelMatrix, fv2);
             
             
             //projection
-            fv0 = math.mul(pMatrix,fv0);
-            fv1 = math.mul(pMatrix, fv1);
-            fv2 = math.mul(pMatrix, fv2);
+            fv0 = math.mul(perspectiveMatrix,fv0);
+            fv1 = math.mul(perspectiveMatrix, fv1);
+            fv2 = math.mul(perspectiveMatrix, fv2);
 
+
+            //screen
+            fv0 = math.mul(viewPortMatrix, fv0);
+            fv1 = math.mul(viewPortMatrix, fv1);
+            fv2 = math.mul(viewPortMatrix, fv2);
+            
+            
             fv2 /= fv2.w;
             fv1 /= fv1.w;
             fv0 /= fv0.w;
-
-            //screen
-            fv0 = math.mul(sMatrix, fv0);
-            fv1 = math.mul(sMatrix, fv1);
-            fv2 = math.mul(sMatrix, fv2);
 
             t[0].m_pos= fv0;
             t[1].m_pos = fv1; 
