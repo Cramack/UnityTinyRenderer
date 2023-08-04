@@ -271,8 +271,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1394683664}
-  m_LocalRotation: {x: -0.0022446653, y: 0.98816437, z: -0.15269327, w: -0.014525867}
-  m_LocalPosition: {x: 291.79068, y: 167.63152, z: 2.5002618}
+  m_LocalRotation: {x: -0.01771747, y: 0.9822821, z: -0.13222933, w: -0.13161795}
+  m_LocalPosition: {x: 1.6856381, y: 1.755661, z: 6.177061}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -300,6 +300,7 @@ MonoBehaviour:
   m_light: {fileID: 2044785333}
   m_headTexture: {fileID: 2800000, guid: 3f2bb7b029e910e4c87f9f8e5866a9cb, type: 3}
   m_c: 500
+  m_enablePerspective: 1
   m_startIndex: 0
 --- !u!1 &1536601082
 GameObject:
@@ -528,6 +529,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: african_head
       objectReference: {fileID: 0}
+    - target: {fileID: 6164996480583612547, guid: fcd157eb144cd0041bee2df666b4c96d, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4d4ef974ae2379f4cb19e7851784c0e3, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
