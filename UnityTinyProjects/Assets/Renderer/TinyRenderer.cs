@@ -243,7 +243,8 @@ public class TinyRenderer : MonoBehaviour
         var uvs = mesh.uv;
         
         
-        
+        //相机与物体的距离.因为世界坐标和相机坐标中间并无缩放,所以具体可以在世界坐标系中计算
+        var cDist=math.distance(m_camera.transform.position,m_headModel.transform.position);
         
         //初始化矩阵
         var modelMatrix= float4x4.identity;
@@ -271,7 +272,7 @@ public class TinyRenderer : MonoBehaviour
                 1,0,0,0,
                 0,1,0,0,
                 0,0,0,1,
-                0,0,-1/m_c,1);
+                0,0,-1/cDist,1);
         }
 
         //构建screen矩阵
