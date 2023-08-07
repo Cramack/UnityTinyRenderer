@@ -242,6 +242,9 @@ public class TinyRenderer : MonoBehaviour
         var vertices = mesh.vertices;
         var uvs = mesh.uv;
         
+        //将模型的顶点从模型空间转换到世界空间
+        //单个的变换为 先scale,再rotate,再translate
+        //其中rotate为 先z,再x,再y. 计算过程中需要一层一层向上累计矩阵
         var localToWorldMatrix=m_headModel.transform.localToWorldMatrix;
         
         
@@ -253,13 +256,8 @@ public class TinyRenderer : MonoBehaviour
         
         
         //构建移动及缩放
-        modelMatrix = new float4x4(
-                1, 0, 0, 0,
-                0, 1, 0, 0,
-                0, 0, 1, 0,
-                0, 0, 0, 1)
-            ;
-        
+        modelMatrix = localToWorldMatrix;
+
         //构建投影矩阵
         if (m_enablePerspective)
         {
