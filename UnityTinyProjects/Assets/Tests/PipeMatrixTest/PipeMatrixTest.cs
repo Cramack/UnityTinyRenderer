@@ -4,7 +4,7 @@ using UnityEngine;
 public class PipeMatrixTest : MonoBehaviour
 {
     public GameObject m_go;
-    float4x4 CalculateTransfrom2Matrix(Transform t)
+    float4x4 CalculateTransform2Matrix(Transform t)
     {
         var ret = float4x4.identity;
 
@@ -59,15 +59,33 @@ public class PipeMatrixTest : MonoBehaviour
         return ret;
     }
 
-    // Update is called once per frame
-    void Update()
+    void OutputModelMatrixTestResult()
     {
         var localToWorldMatrix=m_go.transform.localToWorldMatrix;
-        ConsoleProDebug.Watch("unity M2W matrix","\n"+localToWorldMatrix.ToString());
+        ConsoleProDebug.Watch("unity M2W matrix","\n"+localToWorldMatrix);
 
-        var localMatrix = CalculateTransfrom2Matrix(m_go.transform);
-        var parentMatrix= CalculateTransfrom2Matrix(m_go.transform.parent);
+        var localMatrix = CalculateTransform2Matrix(m_go.transform);
+        var parentMatrix= CalculateTransform2Matrix(m_go.transform.parent);
         var m2wMatrix = math.mul(parentMatrix,localMatrix);
         ConsoleProDebug.Watch("my M2W matrix","\n"+(Matrix4x4)m2wMatrix);
+    }
+
+    void OutputViewMatrixTestResult()
+    {
+        ConsoleProDebug.Watch("camera matrix","\n"+Camera.main.worldToCameraMatrix);
+        ConsoleProDebug.Watch("my view matrix","\n"+(Matrix4x4)CalculateViewMatrix());
+        
+        ConsoleProDebug.Watch("camera forward",Camera.main.transform.forward.ToString());
+        ConsoleProDebug.Watch("cube in camera space",Camera.main.worldToCameraMatrix.MultiplyPoint(m_go.transform.position).ToString());
+    }
+
+    float4x4 CalculateViewMatrix()
+    {
+        return float4x4.identity;
+    }
+
+    void Update()
+    {
+        OutputViewMatrixTestResult();
     }
 }

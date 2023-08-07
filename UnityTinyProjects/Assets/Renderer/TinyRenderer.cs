@@ -248,6 +248,7 @@ public class TinyRenderer : MonoBehaviour
         var localToWorldMatrix=m_headModel.transform.localToWorldMatrix;
         
         
+        
         //初始化矩阵
         var modelMatrix= float4x4.identity;
         var viewMatrix = float4x4.identity;
@@ -288,7 +289,6 @@ public class TinyRenderer : MonoBehaviour
             var uv1 = uvs[triangles[i + 1]];
             var uv2 = uvs[triangles[i + 2]];
 
-            //我们这里假设模型坐标就是世界坐标
 
             //模型的顶点顺序是顺时针的,所以这里的法线是指向外的
             var planeNormal = Vector3.Cross(v1 - v0, v2 - v1).normalized;
