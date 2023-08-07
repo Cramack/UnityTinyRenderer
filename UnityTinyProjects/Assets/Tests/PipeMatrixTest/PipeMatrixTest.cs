@@ -10,6 +10,13 @@ public class PipeMatrixTest : MonoBehaviour
     {
         var ret = float4x4.identity;
         
+        var scale= new float4x4(
+            t.lossyScale.x,0,0,0,
+            0,t.lossyScale.y,0,0,
+            0,0,t.lossyScale.z,0,
+            0,0,0,1
+        );
+        
         var translate= new float4x4(
             1,0,0,t.position.x,
             0,1,0,t.position.y,
@@ -17,7 +24,7 @@ public class PipeMatrixTest : MonoBehaviour
             0,0,0,1
         );
 
-        ret = translate;
+        ret = math.mul(translate,scale);
         
         return ret;
     }
