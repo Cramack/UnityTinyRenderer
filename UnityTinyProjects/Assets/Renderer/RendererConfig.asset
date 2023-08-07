@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49fe5b2f4684b1349b44faff892ce1ae, type: 3}
   m_Name: RendererConfig
   m_EditorClassIdentifier: 
-  m_useUnityNativeRendering: 1
+  m_useUnityNativeRendering: 0
   m_clearColor: {r: 0, g: 0, b: 0, a: 1}

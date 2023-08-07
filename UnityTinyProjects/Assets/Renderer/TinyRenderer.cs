@@ -230,6 +230,7 @@ public class TinyRenderer : MonoBehaviour
     [SerializeField]
     float m_c = 0;
 
+    
     void DrawHeadModel()
     {
         // light direction 
@@ -240,6 +241,8 @@ public class TinyRenderer : MonoBehaviour
         var triangles = mesh.triangles;
         var vertices = mesh.vertices;
         var uvs = mesh.uv;
+        
+        var localToWorldMatrix=m_headModel.transform.localToWorldMatrix;
         
         
         //初始化矩阵
@@ -319,7 +322,6 @@ public class TinyRenderer : MonoBehaviour
             }
 
             //计算屏幕坐标
-            // CalculateScreenFromObject4Tri(ref t);
             DrawTri(t, m_light.color * lightReflectScale * m_light.intensity);
         }
     }
