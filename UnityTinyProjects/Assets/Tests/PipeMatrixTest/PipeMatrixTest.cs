@@ -81,7 +81,35 @@ public class PipeMatrixTest : MonoBehaviour
 
     float4x4 CalculateViewMatrix()
     {
-        return float4x4.identity;
+        var camera = Camera.main;
+        var forward=camera.transform.forward;
+        var right=camera.transform.right;
+        var up=camera.transform.up;
+        
+        //view到world的变换矩阵 
+        var view2World= new float4x4(
+            right.x,up.x, -forward.x,0
+            ,right.y,up.y,-forward.y,0
+            ,right.z,up.z,-forward.z,0,
+            0,0,0,1
+        );
+        
+        //world到view的变换矩阵,因为是正交矩阵，所以其逆矩阵就是其转置矩阵 这里只是旋转矩阵
+        var world2ViewRotationMatrix=math.transpose(view2World);
+        
+        //world到view惯性坐标系的转换,这里只是平移矩阵. 考虑和惯性坐标系的关系. 坐标轴和里面的点的关系是相反的.
+        var world2ViewTranslationMatrix= new float4x4(
+            1,0,0,-camera.transform.position.x,
+            0,1,0,-camera.transform.position.y,
+            0,0,1,-camera.transform.position.z,
+            0,0,0,1
+        );
+        
+        
+        //view到world的变换矩阵 先平移再旋转. 先从世界坐标轴到view的惯性坐标系，再从view的惯性坐标系到view的坐标系
+        var view2WorldMatrix=math.mul(world2ViewRotationMatrix,world2ViewTranslationMatrix);
+        
+        return view2WorldMatrix;
     }
 
     void Update()

@@ -242,10 +242,6 @@ public class TinyRenderer : MonoBehaviour
         var vertices = mesh.vertices;
         var uvs = mesh.uv;
         
-        //将模型的顶点从模型空间转换到世界空间
-        //单个的变换为 先scale,再rotate,再translate
-        //其中rotate为 先z,再x,再y. 计算过程中需要一层一层向上累计矩阵
-        var localToWorldMatrix=m_headModel.transform.localToWorldMatrix;
         
         
         
@@ -256,9 +252,18 @@ public class TinyRenderer : MonoBehaviour
         var viewPortMatrix= float4x4.identity;
         
         
-        //构建移动及缩放
-        modelMatrix = localToWorldMatrix;
+        //将模型的顶点从模型空间转换到世界空间
+        //单个的变换为 先scale,再rotate,再translate
+        //其中rotate为 先z,再x,再y. 计算过程中需要一层一层向上累计矩阵
+        modelMatrix =m_headModel.transform.localToWorldMatrix ;
 
+        //构建view矩阵
+        //构建过程为先把世界坐标转移到相机坐标的惯性坐标系上,然后再进行旋转.
+        //有两个知识点:
+        //1) 正交矩阵的逆等于它的转置(因为aij=ci^t*cj 当i=j时为1 不相等时为0)
+        //2) 相机的坐标系是右手坐标系 
+        viewMatrix = m_camera.worldToCameraMatrix;
+        
         //构建投影矩阵
         if (m_enablePerspective)
         {
