@@ -3,9 +3,7 @@ using UnityEngine;
 
 public class PipeMatrixTest : MonoBehaviour
 {
-    
     public GameObject m_go;
-    
     Matrix4x4 CalculateModel2WorldMatrix(Transform t)
     {
         var ret = float4x4.identity;
@@ -16,6 +14,15 @@ public class PipeMatrixTest : MonoBehaviour
             0,0,t.lossyScale.z,0,
             0,0,0,1
         );
+
+        var rotationAroundXAxis = new float4x4(
+            1,0,0,0,
+            0,1,0,0,
+            0,0,1,0,
+            0,0,0,1
+            );
+
+        var rotation = rotationAroundXAxis;
         
         var translate= new float4x4(
             1,0,0,t.position.x,
@@ -24,12 +31,9 @@ public class PipeMatrixTest : MonoBehaviour
             0,0,0,1
         );
 
-        ret = math.mul(translate,scale);
+        ret =math.mul(translate,math.mul(rotation,scale));
         
         return ret;
-    }
-    void Start()
-    {
     }
 
     // Update is called once per frame
